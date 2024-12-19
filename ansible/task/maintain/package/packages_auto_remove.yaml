@@ -1,0 +1,9 @@
+- name: Auto-remove unnecessary packages with apt
+  when: ansible_pkg_mgr == 'apt'
+  ansible.builtin.apt:
+    autoremove: yes
+
+- name: Auto-remove unnecessary packages with yum
+  when: ansible_pkg_mgr == 'yum'
+  ansible.builtin.command:
+    cmd: yum autoremove -y   

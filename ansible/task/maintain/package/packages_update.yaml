@@ -1,0 +1,14 @@
+- name: Update packages with apt
+  when: ansible_pkg_mgr == 'apt'
+  ansible.builtin.apt:
+    update_cache: true
+
+- name: Update packages with yum
+  when: ansible_pkg_mgr == 'yum'
+  ansible.builtin.yum:
+    name: "*"
+    state: latest # noqa: package-latest
+
+
+
+ 
