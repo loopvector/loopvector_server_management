@@ -1,0 +1,7 @@
+- include_tasks: task/configure/user/add_user.yaml
+  name: Create users if they do not exist
+  vars:
+    user_name: "{{ item.user_name }}"
+    user_password: "{{ item.user_password }}"
+  with_items: "{{ users }}"
+  

@@ -10,9 +10,13 @@ type LineToFileAddRequest struct {
 }
 
 type AddLinesToFileRequest struct {
-	FileFullPath   string
-	FilePermission string
-	AsSudo         bool
+	FileFullPath      string
+	FilePermission    string
+	AsSudo            bool
+	FileOwnerUsername string
+	FileDirPermission string
+	FileDirOwner      string
+	//FilePathOwner     string
 }
 
 func AddLinesToFile(
@@ -32,10 +36,13 @@ func AddLinesToFile(
 		linesToAddVar = append(linesToAddVar, sudoerEntry.Line)
 	}
 	vars := map[string]interface{}{
-		"lines_to_add":   linesToAddVar,
-		"file_mode":      addLinesToFileRequest.FilePermission,
-		"file_full_path": addLinesToFileRequest.FileFullPath,
-		"as_sudo":        addLinesToFileRequest.AsSudo,
+		"lines_to_add":        linesToAddVar,
+		"file_mode":           addLinesToFileRequest.FilePermission,
+		"file_full_path":      addLinesToFileRequest.FileFullPath,
+		"as_sudo":             addLinesToFileRequest.AsSudo,
+		"file_owner_user":     addLinesToFileRequest.FileOwnerUsername,
+		"file_dir_mode":       addLinesToFileRequest.FileDirPermission,
+		"file_dir_owner_user": addLinesToFileRequest.FileDirOwner,
 	}
 
 	_, err := RunAnsibleTasks(

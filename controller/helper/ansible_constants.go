@@ -8,6 +8,9 @@ const KInventoryDefaultBecome = true
 const KPlaybookFileName = "playbook.yaml"
 const KPlaybookFilePath = "ansible"
 
+const KFullPathTaskAddUsers = "task/configure/user/add_users.yaml"
+const KFullPathTaskAddUser = "task/configure/user/add_user.yaml"
+
 const KFullPathTaskAddLinesToFile = "task/configure/file/add_lines.yaml"
 
 const KFullPathTaskAddGroups = "task/configure/group/add_groups.yaml"

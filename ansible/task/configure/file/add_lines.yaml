@@ -5,4 +5,7 @@
     mode: "{{ file_mode }}"
     file_path: "{{ file_full_path }}"
     should_become: "{{ as_sudo }}"
+    owner_user: "{{ file_owner_user }}"
+    dir_mode: "{{ file_dir_mode}}"
+    dir_owner_user: "{{ file_dir_owner_user }}"
   loop: "{{ lines_to_add }}"
