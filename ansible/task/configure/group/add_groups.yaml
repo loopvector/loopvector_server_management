@@ -1,0 +1,6 @@
+- include_tasks: add_group.yaml
+  name: create groups
+  vars:
+    group_name: "{{ item }}"
+  loop: "{{ group_names }}"
+  when: item != ""

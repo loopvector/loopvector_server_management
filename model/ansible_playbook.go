@@ -1,8 +1,9 @@
 package model
 
 import (
+	"encoding/json"
+	"fmt"
 	"loopvector_server_management/controller/helper"
-	"reflect"
 
 	"gopkg.in/yaml.v3"
 )
@@ -13,7 +14,7 @@ type AnsiblePlaybookFile struct {
 
 type AnsibleTask struct {
 	FullPath string
-	Vars     interface{}
+	Vars     map[string]interface{}
 }
 
 type _AnsiblePlaybookFile struct {
@@ -38,16 +39,45 @@ type BaseAnsibleTask struct {
 // }
 
 type _AnsibleTask struct {
-	TaskFullPath string      `yaml:"include_tasks"`
-	Vars         interface{} `yaml:"vars,omitempty"`
+	TaskFullPath string                 `yaml:"include_tasks"`
+	Vars         map[string]interface{} `yaml:"vars,omitempty"`
 }
+
+type AnsiblePlaybookRunResult struct {
+	Stats map[string]interface{} `json:"stats"`
+	Plays []struct {
+		Tasks []struct {
+			Task struct {
+				Duration struct {
+					End   string `json:"end"`
+					Start string `json:"start"`
+				} `json:"duration"`
+				Id   string `json:"id"`
+				Name string `json:"name"`
+			} `json:"task"`
+			Hosts map[string]struct {
+				Changed bool    `json:"changed"`
+				Failed  *bool   `json:"failed,omitempty"`
+				Msg     *string `json:"msg,omitempty"`
+			} `json:"hosts"`
+		} `json:"tasks"`
+	} `json:"plays"`
+}
+
+// type _AnsibleTaskVar struct {
+// 	Vars map[string]interface{} `yaml:"vars,omitempty"`
+// }
 
 func (t *BaseAnsibleTask) GetTaskFullPath() string {
 	return t.TaskFullPath
 }
 
 func (p *_AnsiblePlaybookFile) _AddTask(ansibleTask AnsibleTask) {
-	p.Tasks = append(p.Tasks, _AnsibleTask{TaskFullPath: ansibleTask.FullPath, Vars: ansibleTask.Vars})
+	// println("Adding task with vars: ", ansibleTask.Vars)
+	p.Tasks = append(p.Tasks, _AnsibleTask{
+		TaskFullPath: ansibleTask.FullPath,
+		Vars:         ansibleTask.Vars,
+	})
 }
 
 func (f AnsiblePlaybookFile) CreateNew() (AnsiblePlaybookRunner, error) {
@@ -85,54 +115,66 @@ func (f AnsiblePlaybookFile) CreateNew() (AnsiblePlaybookRunner, error) {
 	}, nil
 }
 
-func (f AnsiblePlaybookRunner) Run() error {
-	_, err := helper.RunAnsiblePlaybook(f.InventoryFileFullPath, f.PlaybookFileFullPath)
+func (f AnsiblePlaybookRunner) Run() (AnsiblePlaybookRunResult, error) {
+	resultMap, err := helper.RunAnsiblePlaybook(f.InventoryFileFullPath, f.PlaybookFileFullPath)
 	if err != nil {
 		panic(err)
 	}
 
+	jsonData, err := json.Marshal(resultMap)
+	if err != nil {
+		return AnsiblePlaybookRunResult{}, fmt.Errorf("error marshaling map to JSON: %w", err)
+	}
+
+	// Unmarshal into the struct
+	var result AnsiblePlaybookRunResult
+	err = json.Unmarshal(jsonData, &result)
+	if err != nil {
+		return AnsiblePlaybookRunResult{}, fmt.Errorf("error unmarshaling JSON to struct: %w", err)
+	}
+
 	//fmt.Print("task result: %v", result)
-	return nil
+	return result, nil
 }
 
-func (t _AnsibleTask) MarshalYAML() (interface{}, error) {
-	// Start with the base structure
-	data := map[string]interface{}{
-		"include_tasks": t.TaskFullPath,
-	}
+// func (t _AnsibleTask) MarshalYAML() (interface{}, error) {
+// 	// Start with the base structure
+// 	data := map[string]interface{}{
+// 		"include_tasks": t.TaskFullPath,
+// 	}
 
-	// Use reflection to dynamically extract additional fields
-	vars := map[string]interface{}{}
-	tValue := reflect.ValueOf(t)
-	tType := reflect.TypeOf(t)
+// 	// Use reflection to dynamically extract additional fields
+// 	vars := map[string]interface{}{}
+// 	tValue := reflect.ValueOf(t)
+// 	tType := reflect.TypeOf(t)
 
-	for i := 0; i < tValue.NumField(); i++ {
-		field := tType.Field(i)
-		yamlTag := field.Tag.Get("yaml")
+// 	for i := 0; i < tValue.NumField(); i++ {
+// 		field := tType.Field(i)
+// 		yamlTag := field.Tag.Get("yaml")
 
-		// Check for `omitempty` in the tag
-		if yamlTag == "" || yamlTag == "include_tasks" {
-			continue
-		}
+// 		// Check for `omitempty` in the tag
+// 		if yamlTag == "" || yamlTag == "include_tasks" {
+// 			continue
+// 		}
 
-		// Split yamlTag into components (e.g., "field_name,omitempty")
-		tagParts := helper.SplitYAMLTag(yamlTag)
+// 		// Split yamlTag into components (e.g., "field_name,omitempty")
+// 		tagParts := helper.SplitYAMLTag(yamlTag)
 
-		// Get field value
-		fieldValue := tValue.Field(i)
+// 		// Get field value
+// 		fieldValue := tValue.Field(i)
 
-		// Apply omitempty check
-		if len(tagParts) > 1 && tagParts[1] == "omitempty" && helper.IsEmptyValue(fieldValue) {
-			continue
-		}
+// 		// Apply omitempty check
+// 		if len(tagParts) > 1 && tagParts[1] == "omitempty" && helper.IsEmptyValue(fieldValue) {
+// 			continue
+// 		}
 
-		// Add to vars map
-		vars[tagParts[0]] = fieldValue.Interface()
-	}
+// 		// Add to vars map
+// 		vars[tagParts[0]] = fieldValue.Interface()
+// 	}
 
-	if len(vars) > 0 {
-		data["vars"] = vars
-	}
+// 	if len(vars) > 0 {
+// 		data["vars"] = vars
+// 	}
 
-	return data, nil
-}
+// 	return data, nil
+// }

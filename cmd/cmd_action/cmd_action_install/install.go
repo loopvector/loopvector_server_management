@@ -38,17 +38,94 @@ to quickly create a Cobra application.`,
 	},
 	Args: cobra.MatchAll(cobra.ExactArgs(1), cobra.OnlyValidArgs),
 	Run: func(cmd *cobra.Command, args []string) {
-		controller.RunAnsibleTasks(
+		// println("appsToInstallList: ", appsToInstallList)
+		// Task to install the list of apps at once
+		vars := map[string]interface{}{
+			"package_names": appsToInstallList,
+		}
+
+		callbacks := []controller.RunAnsibleTaskCallback{}
+
+		serverId, err := model.ServerNameModel{Name: args[0]}.GetServerIdUsingServerName()
+		if err != nil {
+			panic(err)
+		}
+
+		for _, app := range appsToInstallList {
+			callbacks = append(
+				callbacks,
+				controller.RunAnsibleTaskCallback{
+					TaskName: "install package " + app,
+					OnChanged: func() {
+						// println("Installed ", app, " on ", args[0])
+						model.ServerApp{
+							ServerID: serverId,
+							Name:     app,
+						}.RegisterInstall()
+					},
+					OnUnchanged: func() {
+						// println("Already installed ", app, " on ", args[0])
+						model.ServerApp{
+							ServerID: serverId,
+							Name:     app,
+						}.RegisterInstall()
+					},
+					OnFailed: func() {
+						// println("Failed to install ", app, " on ", args[0])
+					},
+				},
+			)
+		}
+
+		_, err = controller.RunAnsibleTasks(
 			model.ServerNameModel{Name: args[0]},
-			[]model.AnsibleTask{{FullPath: helper.KFullPathTaskInstallApps, Vars: appsToInstallList}},
+			[]model.AnsibleTask{{FullPath: helper.KFullPathTaskInstallApps, Vars: vars}},
+			callbacks,
 		)
+
+		if err != nil {
+			panic(err)
+		}
+
+		// for _, play := range result.Plays {
+		// 	for _, taskResult := range play.Tasks {
+		// 		for _, appToInstall := range appsToInstallList {
+		// 			println("About to check install status of ", appToInstall, " on ", args[0], " in task name ", taskResult.Task.Name)
+		// 			if taskResult.Task.Name == "install package "+appToInstall {
+		// 				if taskResult.Hosts["name="+args[0]].Failed == nil {
+		// 					if taskResult.Hosts["name="+args[0]].Changed {
+		// 						println("Installed ", appToInstall, " on ", args[0])
+		// 					} else {
+		// 						println("Already installed ", appToInstall, " on ", args[0])
+		// 					}
+		// 				} else {
+		// 					println("Failed to install ", appToInstall, " on ", args[0])
+		// 				}
+		// 			}
+		// 		}
+		// 	}
+		// }
+
+		//fmt.Print("task result: %v", result)
+
+		// Task to install the list of apps on by one
+		// for _, app := range appsToInstallList {
+		// 	vars := map[string]interface{}{
+		// 		"package_name": app,
+		// 	}
+		// 	controller.RunAnsibleTasks(
+		// 		model.ServerNameModel{Name: args[0]},
+		// 		[]model.AnsibleTask{{FullPath: helper.KFullPathTaskInstallApp, Vars: vars}},
+		// 	)
+		// }
+
 	},
 }
 
 func init() {
 	cmd_action.GetActionCmd().AddCommand(installCmd)
 
-	installCmd.Flags().StringArrayVar(&appsToInstallList, "apps", []string{}, "install the list of apps to the server")
+	installCmd.Flags().StringSliceVar(&appsToInstallList, "apps", []string{}, "install the list of apps to the server")
 
 	installCmd.MarkFlagRequired("apps")
 }

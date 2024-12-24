@@ -1,21 +1,24 @@
 /*
 Copyright © 2024 Agilan Anandan <agilan@loopvector.com>
 */
-package cmd_action_package_upgrade
+package cmd_action_group_add
 
 import (
 	"fmt"
-	"loopvector_server_management/cmd/cmd_action/cmd_action_package"
+	"loopvector_server_management/cmd/cmd_action/cmd_action_group"
 	"loopvector_server_management/controller"
-	"loopvector_server_management/controller/helper"
-	"loopvector_server_management/model"
 
 	"github.com/spf13/cobra"
 )
 
-// upgradeCmd represents the upgrade command
-var upgradeCmd = &cobra.Command{
-	Use:   "upgrade",
+var (
+	groupsToAdd []string
+	groupToAdd  string
+)
+
+// addCmd represents the add command
+var addCmd = &cobra.Command{
+	Use:   "add",
 	Short: "A brief description of your command",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
@@ -34,24 +37,20 @@ to quickly create a Cobra application.`,
 	},
 	Args: cobra.MatchAll(cobra.ExactArgs(1), cobra.OnlyValidArgs),
 	Run: func(cmd *cobra.Command, args []string) {
-		controller.RunAnsibleTasks(
-			model.ServerNameModel{Name: args[0]},
-			[]model.AnsibleTask{{FullPath: helper.KFullPathTaskPackageUpgrade}},
-			nil,
-		)
+		if groupToAdd != "" {
+			controller.AddGroupsToServer(args[0], []string{groupToAdd})
+		}
+		if len(groupsToAdd) != 0 {
+			controller.AddGroupsToServer(args[0], groupsToAdd)
+		}
 	},
 }
 
 func init() {
-	cmd_action_package.GetActionPackageCmd().AddCommand(upgradeCmd)
+	cmd_action_group.GetActionGroupCmd().AddCommand(addCmd)
 
-	// Here you will define your flags and configuration settings.
+	addCmd.Flags().StringSliceVar(&groupsToAdd, "groups", []string{}, "add the list of groups to the server")
+	addCmd.Flags().StringVar(&groupToAdd, "group", "", "add the group to the server")
 
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// upgradeCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// upgradeCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	addCmd.MarkFlagsOneRequired("groups", "group")
 }

@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"loopvector_server_management/controller/helper"
 
 	"gopkg.in/yaml.v3"
@@ -60,10 +59,10 @@ func (r *GenerateAnsiblePlaybook) GeneratePlaybook() {
 }
 
 func (r *RunAnsiblePlaybook) RunPlaybook() {
-	result, err := helper.RunAnsiblePlaybook(r.InventoryFileFullPath, r.PlaybookFileFullPath)
+	_, err := helper.RunAnsiblePlaybook(r.InventoryFileFullPath, r.PlaybookFileFullPath)
 	if err != nil {
 		panic(err)
 	}
 
-	fmt.Print("task result: %v", result)
+	//fmt.Print("task result: %v", result)
 }

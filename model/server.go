@@ -103,3 +103,18 @@ func (s *ServerNameModel) GetIpv4UsingServerName() (ServerIpv4, error) {
 	}
 	return result, nil
 }
+
+// func (s *ServerNameModel) GetAppUsingServerName() (ServerApp, error) {
+// 	serverId, err := s.GetServerIdUsingServerName()
+// 	if err != nil {
+// 		panic(err)
+// 	}
+// 	var serverApp = ServerApp{
+// 		ServerID: serverId,
+// 	}
+// 	result, err := serverApp.Get()
+// 	if err != nil {
+// 		panic(err)
+// 	}
+// 	return result, nil
+// }

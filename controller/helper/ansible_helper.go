@@ -1,6 +1,8 @@
 package helper
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -21,8 +23,9 @@ func RunAnsiblePlaybook(inventoryPath, playbookPath string) (map[string]interfac
 	println("command: " + cmd.String())
 
 	// Capture the output
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	cmd.Stderr = &out
 
 	// Run the command
 	err := cmd.Run()
@@ -30,13 +33,15 @@ func RunAnsiblePlaybook(inventoryPath, playbookPath string) (map[string]interfac
 		return nil, fmt.Errorf("error running ansible-playbook: %s", err)
 	}
 
-	// Parse JSON output
-	// var result map[string]interface{}
-	// if err := json.Unmarshal(stdout.Bytes(), &result); err != nil {
-	// 	return nil, fmt.Errorf("error parsing JSON output: %s", err)
-	// }
+	//Parse JSON output
+	var parsedMap map[string]interface{}
+	err = json.Unmarshal(out.Bytes(), &parsedMap)
+	if err != nil {
+		fmt.Printf("Error parsing JSON: %v\nOutput: %s\n", err, out.String())
+		return nil, err
+	}
 
-	return nil, nil
+	return parsedMap, nil
 }
 
 func GenerateInventoryFileContent(input []interface{}) (string, error) {

@@ -1,7 +1,5 @@
 package model
 
-import "log"
-
 type ServerUser struct {
 	ID                        uint64 `gorm:"primaryKey;autoIncrement"`
 	ServerID                  uint64 `gorm:"not null;index:uk_server_user_idx_server_id_username,unique"`
@@ -25,9 +23,19 @@ func (ServerUser) Initialize() {
 }
 
 func (u *ServerUser) CreateNew() error {
-	if err := DB.Create(&u).Error; err != nil {
-		log.Fatalf("failed to create server: %v", err)
+	if err := DB.Where(&ServerUser{ServerID: u.ServerID, Username: u.Username}).
+		Attrs(&ServerUser{ServerUserActiveStateName: ServerUserActiveState{}.GetServerUserActiveStateData().Name}).
+		FirstOrCreate(&u).Error; err != nil {
 		return err
 	}
 	return nil
 }
+
+// func (u *ServerUser) Remove() error {
+// 	if err := DB.Where(&ServerUser{ServerID: u.ServerID, Username: u.Username}).
+// 		Attrs(&ServerUser{ServerUserActiveStateName: ServerUserActiveState{}.GetServerUserNotActiveStateData().Name}).
+// 		FirstOrCreate(&u).Error; err != nil {
+// 		return err
+// 	}
+// 	return nil
+// }

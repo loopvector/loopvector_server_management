@@ -1,8 +1,6 @@
 package model
 
-import (
-	"loopvector_server_management/controller/helper"
-)
+import "loopvector_server_management/controller/helper"
 
 type AnsibleInventoryFileRootUserIpv4 struct {
 	ServerName     string

@@ -1,0 +1,5 @@
+- name: "create group {{ group_name }}"
+  ansible.builtin.group:
+    name: "{{ group_name }}"
+    state: present
+  when: group_name != ""

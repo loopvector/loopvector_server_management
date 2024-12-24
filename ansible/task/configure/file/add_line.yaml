@@ -1,0 +1,16 @@
+- name: "Add a line to a file if it does not exist"
+  become: "{{ should_become }}"
+  lineinfile:
+    path: "{{ file_path }}"
+    line: "{{ line_to_add }}"
+    create: yes
+  when: mode == ""  # Run this task if mode is empty
+
+- name: "Add a line to a file if it does not exist and set permissions"
+  become: "{{ should_become }}"
+  lineinfile:
+    path: "{{ file_path }}"
+    line: "{{ line_to_add }}"
+    create: yes
+    mode: "{{ mode }}"
+  when: mode != ""  # Run this task if mode is provided

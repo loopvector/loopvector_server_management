@@ -37,6 +37,7 @@ to quickly create a Cobra application.`,
 		controller.RunAnsibleTasks(
 			model.ServerNameModel{Name: args[0]},
 			[]model.AnsibleTask{{FullPath: helper.KFullPathTaskReboot}},
+			nil,
 		)
 	},
 }

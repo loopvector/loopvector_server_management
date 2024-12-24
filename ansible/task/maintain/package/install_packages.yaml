@@ -1,8 +1,8 @@
 - include_tasks: packages_update.yaml
 
-- name: Install packages
-  apt:
-    name: "{{ item }}"
-    state: present
+- name: "install packages" 
+  include_tasks: install_package.yaml 
+  vars: 
+    package_name: "{{ item }}"
   loop: "{{ package_names }}"
   when: item != ""

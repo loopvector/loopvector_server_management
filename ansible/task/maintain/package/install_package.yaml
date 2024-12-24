@@ -1,6 +1,6 @@
 - include_tasks: packages_update.yaml
 
-- name: Install package
+- name: "install package {{ package_name }}"
   apt:
     name: "{{ package_name }}"
     state: present

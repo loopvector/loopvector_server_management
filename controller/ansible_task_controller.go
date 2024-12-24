@@ -2,7 +2,18 @@ package controller
 
 import "loopvector_server_management/model"
 
-func RunAnsibleTasks(serverName model.ServerNameModel, ansibleTasks []model.AnsibleTask) error {
+type RunAnsibleTaskCallback struct {
+	TaskName    string
+	OnChanged   func()
+	OnUnchanged func()
+	OnFailed    func()
+}
+
+func RunAnsibleTasks(
+	serverName model.ServerNameModel,
+	ansibleTasks []model.AnsibleTask,
+	callbacks []RunAnsibleTaskCallback,
+) (model.AnsiblePlaybookRunResult, error) {
 	serverRootUser, serverIpv4, err := serverName.GetServerRootUserIpv4UsingServerName()
 	if err != nil {
 		panic(err)
@@ -26,6 +37,33 @@ func RunAnsibleTasks(serverName model.ServerNameModel, ansibleTasks []model.Ansi
 		panic(err)
 	}
 
-	ansiblePlaybookRunner.Run()
-	return nil
+	result, err := ansiblePlaybookRunner.Run()
+
+	if err != nil {
+		panic(err)
+	}
+
+	for _, play := range result.Plays {
+		for _, taskResult := range play.Tasks {
+			for _, callback := range callbacks {
+				// println("About to check install status of ", callback.TaskName, " on ", serverName.Name, " in task name ", taskResult.Task.Name)
+				if taskResult.Task.Name == callback.TaskName {
+					if taskResult.Hosts["name="+serverName.Name].Failed == nil {
+						if taskResult.Hosts["name="+serverName.Name].Changed {
+							// println("changed ", callback.TaskName, " on ", serverName.Name)
+							callback.OnChanged()
+						} else {
+							// println("unchanged ", callback.TaskName, " on ", serverName.Name)
+							callback.OnUnchanged()
+						}
+					} else {
+						// println("failed ", callback.TaskName, " on ", serverName.Name)
+						callback.OnFailed()
+					}
+				}
+			}
+		}
+	}
+
+	return result, nil
 }

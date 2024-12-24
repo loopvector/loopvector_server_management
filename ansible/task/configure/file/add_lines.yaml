@@ -1,0 +1,8 @@
+- include_tasks: add_line.yaml 
+  name: "Add each line from the list to the file"
+  vars:
+    line_to_add: "{{ item }}"
+    mode: "{{ file_mode }}"
+    file_path: "{{ file_full_path }}"
+    should_become: "{{ as_sudo }}"
+  loop: "{{ lines_to_add }}"
