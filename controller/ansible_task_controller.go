@@ -9,6 +9,24 @@ type RunAnsibleTaskCallback struct {
 	OnFailed    func()
 }
 
+func RunSimpleAnsibleTasks(
+	serverName model.ServerNameModel,
+	taskFullPath string,
+	vars map[string]interface{},
+	// varsArray []map[string]interface{},
+	callback *RunAnsibleTaskCallback,
+) (model.AnsiblePlaybookRunResult, error) {
+	return RunAnsibleTasks(
+		serverName,
+		[]model.AnsibleTask{{
+			FullPath: taskFullPath,
+			Vars:     vars,
+			// VarsArray: varsArray,
+		}},
+		[]RunAnsibleTaskCallback{*callback},
+	)
+}
+
 func RunAnsibleTasks(
 	serverName model.ServerNameModel,
 	ansibleTasks []model.AnsibleTask,

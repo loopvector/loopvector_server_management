@@ -1,0 +1,5 @@
+- name: Enable UFW
+  become: true
+  ansible.builtin.ufw:
+    state: enabled
+    policy: allow

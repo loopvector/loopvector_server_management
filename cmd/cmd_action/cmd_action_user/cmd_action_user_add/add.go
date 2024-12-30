@@ -18,6 +18,8 @@ var (
 	password  string
 	usernames []string
 	passwords []string
+	group     string
+	groups    []string
 )
 
 // addCmd represents the add command
@@ -51,6 +53,7 @@ to quickly create a Cobra application.`,
 				controller.AddUsersToServerRequest{
 					Username: username,
 					Password: password,
+					Groups:   _getGroups(),
 				},
 			)
 		} else {
@@ -63,14 +66,29 @@ to quickly create a Cobra application.`,
 					controller.AddUsersToServerRequest{
 						Username: usernames[i],
 						Password: passwords[i],
+						Groups:   _getGroups(),
 					},
 				)
 			}
 		}
 
+		// for _, oneUser := range allUsers {
+		// 	println("oneUser: ", oneUser.Groups)
+		// }
+
 		controller.AddUsersToServer(serverName, allUsers)
 		return nil
 	},
+}
+
+func _getGroups() []string {
+	allGroups := []string{}
+	if group != "" {
+		allGroups = append(allGroups, group)
+	} else if len(groups) > 0 {
+		allGroups = append(allGroups, groups...)
+	}
+	return allGroups
 }
 
 func init() {
@@ -85,6 +103,11 @@ func init() {
 	addCmd.Flags().StringSliceVar(&passwords, "passwords", []string{}, "password of the users to be added to the server")
 
 	addCmd.MarkFlagsRequiredTogether("usernames", "passwords")
+
+	addCmd.Flags().StringVar(&group, "group", "", "group to which the user is to be added")
+	addCmd.Flags().StringSliceVar(&groups, "groups", []string{}, "groups to which the user is to be added")
+
+	addCmd.MarkFlagsMutuallyExclusive("group", "groups")
 
 	addCmd.MarkFlagsMutuallyExclusive("username", "usernames")
 }

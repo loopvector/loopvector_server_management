@@ -13,7 +13,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const sudoersFileCreatePath = "/etc/sudoers"
+const sudoersFileCreatePath = "/etc/sudoers.d"
 
 var (
 	fileName           string

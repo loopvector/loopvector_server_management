@@ -16,11 +16,12 @@ const sshdConfigFileCreatePath = "/etc/ssh/sshd_config.d"
 
 var (
 	//port                        uint16
-	sshdConfigKey      string
-	sshdConfigValue    string
-	matchDirective     string
-	fileName           string
-	filePermissionMode = "0644"
+	sshdConfigKey         string
+	sshdConfigValue       string
+	matchDirective        string
+	fileName              string
+	filePermissionMode    = "0755"
+	fileDirPermissionMode = "0755"
 	// usersPermitRootLogin        []string
 	// permitRootLogin             bool
 	// usersPubkeyAuthentication   []string
@@ -57,9 +58,10 @@ to quickly create a Cobra application.`,
 		controller.AddASshdConfig(
 			serverName,
 			controller.AddLinesToFileRequest{
-				FileFullPath:   fileFullPath,
-				FilePermission: filePermissionMode,
-				AsSudo:         true,
+				FileFullPath:      fileFullPath,
+				FilePermission:    filePermissionMode,
+				AsSudo:            true,
+				FileDirPermission: fileDirPermissionMode,
 			},
 			controller.SSHDConfigAddRequest{
 				Key:            sshdConfigKey,

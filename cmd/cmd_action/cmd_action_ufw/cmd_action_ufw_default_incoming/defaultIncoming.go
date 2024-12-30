@@ -1,20 +1,20 @@
 /*
 Copyright © 2024 Agilan Anandan <agilan@loopvector.com>
 */
-package cmd_action_ufw_allow
+package cmd
 
 import (
 	"fmt"
 	"loopvector_server_management/cmd/cmd_action/cmd_action_ufw"
-	"loopvector_server_management/cmd/cmd_action/cmd_action_ufw/helper"
 	"loopvector_server_management/controller"
+	"loopvector_server_management/model"
 
 	"github.com/spf13/cobra"
 )
 
-// allowCmd represents the allow command
-var allowCmd = &cobra.Command{
-	Use:   "allow",
+// defaultIncomingCmd represents the defaultIncoming command
+var defaultIncomingCmd = &cobra.Command{
+	Use:   "defaultIncoming",
 	Short: "A brief description of your command",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
@@ -29,20 +29,20 @@ to quickly create a Cobra application.`,
 			return nil, cobra.ShellCompDirectiveError
 		}
 
+		trafficPolicies := []string{controller.UfwTrafficPolicyAllow, controller.UfwTrafficPolicyDeny}
+		suggestions = append(suggestions, trafficPolicies...)
 		return suggestions, cobra.ShellCompDirectiveNoFileComp
 	},
-	Args: cobra.MatchAll(cobra.ExactArgs(1), cobra.OnlyValidArgs),
-	RunE: func(cmd *cobra.Command, args []string) error {
-		return helper.RunUfwTrafficPolicyCommandE(
-			cmd,
-			args,
-			controller.UfwTrafficPolicy{Policy: controller.UfwTrafficPolicyAllow},
+	Args: cobra.MatchAll(cobra.ExactArgs(2), cobra.OnlyValidArgs),
+	Run: func(cmd *cobra.Command, args []string) {
+		controller.SetDefaultIncomingUfwTrafficPolicy(
+			model.ServerNameModel{Name: args[0]},
+			controller.UfwTrafficPolicy{Policy: args[1]},
 		)
 	},
 }
 
 func init() {
-	cmd_action_ufw.GetActionUfwCmd().AddCommand(allowCmd)
+	cmd_action_ufw.GetActionUfwCmd().AddCommand(defaultIncomingCmd)
 
-	helper.InitUfwTrafficPolicyCommandFlags(allowCmd)
 }

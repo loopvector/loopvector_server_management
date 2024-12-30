@@ -1,0 +1,7 @@
+- include_tasks: port_ufw_traffic_policy.yaml
+  name: "{{ traffic_policy | lower }} specified ports"
+  vars:
+    ufw_port: "{{ item }}"
+    # traffic_policy: "{{ traffic_policy | lower }}"
+  loop: "{{ ufw_ports }}"
+  when: ufw_ports | length > 0

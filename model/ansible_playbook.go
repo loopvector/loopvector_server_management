@@ -12,10 +12,20 @@ type AnsiblePlaybookFile struct {
 	AnsibleTasks []AnsibleTask
 }
 
+// type AnsiblePlaybookFileWithVarsArray struct {
+// 	AnsibleTasks []AnsibleTaskWithVarsArray
+// }
+
 type AnsibleTask struct {
 	FullPath string
 	Vars     map[string]interface{}
+	//VarsArray []map[string]interface{}
 }
+
+// type AnsibleTaskWithVarsArray struct {
+// 	FullPath string
+// 	Vars     []map[string]interface{}
+// }
 
 type _AnsiblePlaybookFile struct {
 	HostsTag string         `yaml:"hosts"`
@@ -41,7 +51,13 @@ type BaseAnsibleTask struct {
 type _AnsibleTask struct {
 	TaskFullPath string                 `yaml:"include_tasks"`
 	Vars         map[string]interface{} `yaml:"vars,omitempty"`
+	// VarsArray    []map[string]interface{} `yaml:"vars,omitempty"`
 }
+
+// type _AnsibleTaskWithVarsArray struct {
+// 	TaskFullPath string                   `yaml:"include_tasks"`
+// 	Vars         []map[string]interface{} `yaml:"vars,omitempty"`
+// }
 
 type AnsiblePlaybookRunResult struct {
 	Stats map[string]interface{} `json:"stats"`
@@ -77,6 +93,7 @@ func (p *_AnsiblePlaybookFile) _AddTask(ansibleTask AnsibleTask) {
 	p.Tasks = append(p.Tasks, _AnsibleTask{
 		TaskFullPath: ansibleTask.FullPath,
 		Vars:         ansibleTask.Vars,
+		// VarsArray:    ansibleTask.VarsArray,
 	})
 }
 

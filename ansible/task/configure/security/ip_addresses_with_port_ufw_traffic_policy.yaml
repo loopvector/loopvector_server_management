@@ -1,0 +1,7 @@
+- include_tasks: ip_address_with_port_ufw_traffic_policy.yaml
+  name: "{{ traffic_policy | lower }} specified IP:port pairs"
+  vars:
+    ufw_ip_port_pair: "{{ item }}"
+    # traffic_policy: "{{ traffic_policy | lower }}"
+  loop: "{{ ufw_ip_port_pairs }}"
+  when: ufw_ip_port_pairs | length > 0

@@ -1,0 +1,4 @@
+- name: Disable UFW
+  become: true
+  ansible.builtin.ufw:
+    state: disabled

@@ -1,0 +1,5 @@
+- name: Ensure user "{{ user_name }}" is added to groups "{{ user_groups }}"
+  ansible.builtin.user:
+    name: "{{ user_name }}"
+    groups: "{{ user_groups | join(',') }}"
+    append: yes

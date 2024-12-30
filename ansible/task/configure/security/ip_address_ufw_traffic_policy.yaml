@@ -1,0 +1,6 @@
+- name: "{{ traffic_policy }} ip {{ ufw_ip.ip }} in ufw"
+  become: true
+  ansible.builtin.ufw:
+    rule: "{{ traffic_policy }}"
+    from_ip: "{{ ufw_ip.ip }}"
+    proto: "{{ ufw_ip.protocol if ufw_ip.protocol | length > 0 else omit }}"

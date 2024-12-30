@@ -1,0 +1,7 @@
+- include_tasks: ip_address_ufw_traffic_policy.yaml
+  name:  "{{ traffic_policy | lower }} specified IPs" 
+  vars:
+    ufw_ip: "{{ item }}"
+    # traffic_policy: "{{ traffic_policy | lower }}"
+  loop: "{{ ufw_ips }}"
+  when: ufw_ips | length > 0

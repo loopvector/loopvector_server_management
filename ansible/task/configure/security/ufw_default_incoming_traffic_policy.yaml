@@ -1,0 +1,4 @@
+- name: Set UFW default policy for incoming traffic
+  ansible.builtin.command:
+    cmd: "ufw default {{ traffic_policy | lower }} incoming"
+  become: true

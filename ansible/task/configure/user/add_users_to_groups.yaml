@@ -1,0 +1,8 @@
+- name: Add users to groups
+  include_tasks: add_user_to_groups.yaml
+  with_items: "{{ users_and_groups }}"
+  loop_control:
+    label: "{{ item.user_name }}"
+  vars:
+    user_name: "{{ item.user_name }}"
+    user_groups: "{{ item.user_groups }}"
