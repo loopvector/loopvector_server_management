@@ -13,11 +13,11 @@ type ServerIpv4 struct {
 }
 
 func (ServerIpv4) Initialize() {
-	DB.AutoMigrate(&ServerIpv4{})
+	GetDB().AutoMigrate(&ServerIpv4{})
 }
 
 func (ipv4 *ServerIpv4) CreateNew() error {
-	if err := DB.Create(&ipv4).Error; err != nil {
+	if err := GetDB().Create(&ipv4).Error; err != nil {
 		log.Fatalf("failed to create server: %v", err)
 		return err
 	}
@@ -26,7 +26,7 @@ func (ipv4 *ServerIpv4) CreateNew() error {
 
 func (s *ServerIpv4) GetUsingServerId() (ServerIpv4, error) {
 	var serverIpv4Details ServerIpv4
-	if err := DB.Where(&ServerIpv4{ServerID: s.ServerID}).Find(&serverIpv4Details).Error; err != nil {
+	if err := GetDB().Where(&ServerIpv4{ServerID: s.ServerID}).Find(&serverIpv4Details).Error; err != nil {
 		return ServerIpv4{}, err
 	}
 	return serverIpv4Details, nil

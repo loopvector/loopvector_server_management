@@ -12,11 +12,11 @@ type ServerApp struct {
 }
 
 func (ServerApp) Initialize() {
-	DB.AutoMigrate(&ServerApp{})
+	GetDB().AutoMigrate(&ServerApp{})
 }
 
 func (s ServerApp) RegisterInstall() error {
-	if err := DB.Where(&ServerApp{
+	if err := GetDB().Where(&ServerApp{
 		ServerID: s.ID,
 		Name:     s.Name,
 	}).Attrs(&ServerApp{ServerAppInstallStateName: ServerAppInstallState{}.GetServerAppInstalledStateData().Name}).FirstOrCreate(&s).Error; err != nil {
@@ -26,12 +26,12 @@ func (s ServerApp) RegisterInstall() error {
 }
 
 func (s ServerApp) RegisterUninstall() error {
-	if err := DB.Where(&ServerApp{
+	if err := GetDB().Where(&ServerApp{
 		ServerID: s.ID,
 		Name:     s.Name,
 	}).Attrs(&ServerApp{ServerAppInstallStateName: ServerAppInstallState{}.GetServerAppUninstalledStateData().Name}).
-	FirstOrCreate(&s).
-	Assign(&s).Error; err != nil {
+		FirstOrCreate(&s).
+		Assign(&s).Error; err != nil {
 		return err
 	}
 	return nil

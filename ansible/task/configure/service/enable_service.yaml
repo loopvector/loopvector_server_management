@@ -1,0 +1,6 @@
+- name: "enable service {{ service_name }}"
+  become: true
+  service:
+    name: "{{ service_name }}"
+    enabled: yes
+  when: service_name != ""    

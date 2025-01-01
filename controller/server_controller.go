@@ -92,19 +92,28 @@ func DeleteServer(serverName string) {
 	}
 }
 
-func GetAllActiveServerNames() ([]string, error) {
-	activeServer := model.Server{ServerActiveStateName: model.ServerActiveState{}.GetServerActiveStateData().Name}
-	servers := activeServer.GetAllActive()
-	var serverNames []string
-	for _, server := range servers {
-		serverNames = append(serverNames, server.ServerName)
-	}
-	return serverNames, nil
+func GetAllActiveServerNames() []string {
+	return nil
 }
 
-func ListAllServers() {
+func GetAllActiveServerNamesWithoutError() []string {
+	servers, err := model.Server{
+		ServerActiveStateName: model.ServerActiveState{}.GetServerActiveStateData().Name,
+	}.GetAllActive()
+	if err != nil {
+		return []string{}
+	}
+	var serverNames []string
+	for _, server := range servers {
+		println("Server Name: ", server.ServerName)
+		serverNames = append(serverNames, server.ServerName)
+	}
+	return serverNames
+}
+
+func ListAllServers() error {
 	activeServer := model.Server{ServerActiveStateName: model.ServerActiveState{}.GetServerActiveStateData().Name}
-	servers := activeServer.GetAllActive()
+	servers, err := activeServer.GetAllActive()
 	if len(servers) == 0 {
 		println("No active servers found")
 	} else {
@@ -113,4 +122,5 @@ func ListAllServers() {
 			println("Server Display Name: ", server.DisplayName)
 		}
 	}
+	return err
 }

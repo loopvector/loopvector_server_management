@@ -8,11 +8,11 @@ type ServerGroup struct {
 }
 
 func (ServerGroup) Initialize() {
-	DB.AutoMigrate(&ServerGroup{})
+	GetDB().AutoMigrate(&ServerGroup{})
 }
 
 func (id ServerIDModel) AddGroup(serverGroup ServerGroup) error {
-	if err := DB.Where(&ServerGroup{
+	if err := GetDB().Where(&ServerGroup{
 		ServerID: id.ID,
 		Name:     serverGroup.Name,
 	}).Attrs(&ServerGroup{Exists: true}).
@@ -24,7 +24,7 @@ func (id ServerIDModel) AddGroup(serverGroup ServerGroup) error {
 }
 
 // func (sg ServerGroup) Remove() error {
-// 	if err := DB.Where(&ServerGroup{
+// 	if err := GetDB().Where(&ServerGroup{
 // 		ServerID: sg.ID,
 // 		Name:     sg.Name,
 // 	}).Attrs(&ServerGroup{Exists: false}).FirstOrCreate(&sg).Assign(&sg).Error; err != nil {

@@ -8,6 +8,10 @@ const KInventoryDefaultBecome = true
 const KPlaybookFileName = "playbook.yaml"
 const KPlaybookFilePath = "ansible"
 
+const KFullPathTaskServiceEnable = "task/configure/service/enable_services.yaml"
+const KFullPathTaskServiceStart = "task/configure/service/start_services.yaml"
+const KFullPathTaskServiceRestart = "task/configure/service/restart_services.yaml"
+
 const KFullPathTaskUfwEnable = "task/configure/security/enable_ufw.yaml"
 const KFullPathTaskUfwDisable = "task/configure/security/disable_ufw.yaml"
 

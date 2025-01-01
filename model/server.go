@@ -19,11 +19,11 @@ type Server struct {
 }
 
 func (Server) Initialize() {
-	DB.Debug().AutoMigrate(&Server{})
+	GetDB().Debug().AutoMigrate(&Server{})
 }
 
 func (s *Server) CreateNew() (uint64, error) {
-	if err := DB.Create(&s).Error; err != nil {
+	if err := GetDB().Create(&s).Error; err != nil {
 		log.Fatalf("failed to create server: %v", err)
 		return 0, err
 	}
@@ -31,22 +31,24 @@ func (s *Server) CreateNew() (uint64, error) {
 }
 
 func (s *Server) Delete() error {
-	if err := DB.Where(&Server{ServerName: s.ServerName}).Delete(&Server{}).Error; err != nil {
+	if err := GetDB().Where(&Server{ServerName: s.ServerName}).Delete(&Server{}).Error; err != nil {
 		log.Fatalf("failed to delete server: %v", err)
 		return err
 	}
 	return nil
 }
 
-func (s *Server) GetAllActive() []Server {
+func (s Server) GetAllActive() ([]Server, error) {
 	var servers []Server
-	DB.Where(&Server{ServerActiveStateName: s.ServerActiveState.Name}).Find(&servers)
-	return servers
+	if err := GetDB().Where(&Server{ServerActiveStateName: s.ServerActiveStateName}).Find(&servers).Error; err != nil {
+		return nil, err
+	}
+	return servers, nil
 }
 
 func (s ServerNameModel) GetServerIdUsingServerName() (uint64, error) {
 	var result Server
-	if err := DB.Where(&Server{ServerName: s.Name}).Select("id").First(&result).Error; err != nil {
+	if err := GetDB().Where(&Server{ServerName: s.Name}).Select("id").First(&result).Error; err != nil {
 		return 0, err
 	}
 	return result.ID, nil

@@ -4,7 +4,6 @@ Copyright © 2024 Agilan Anandan <agilan@loopvector.com>
 package cmd_action_reboot
 
 import (
-	"fmt"
 	"loopvector_server_management/cmd/cmd_action"
 	"loopvector_server_management/controller"
 	"loopvector_server_management/controller/helper"
@@ -23,22 +22,14 @@ and usage of using your command. For example:
 Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
-	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		suggestions, err := controller.GetAllActiveServerNames()
-		if err != nil {
-			fmt.Println("Error querying database:", err)
-			return nil, cobra.ShellCompDirectiveError
-		}
-
-		return suggestions, cobra.ShellCompDirectiveNoFileComp
-	},
-	Args: cobra.MatchAll(cobra.ExactArgs(1), cobra.OnlyValidArgs),
-	Run: func(cmd *cobra.Command, args []string) {
+	Args: cobra.NoArgs,
+	RunE: func(cmd *cobra.Command, args []string) error {
 		controller.RunAnsibleTasks(
-			model.ServerNameModel{Name: args[0]},
+			model.ServerNameModel{Name: cmd_action.ServerName},
 			[]model.AnsibleTask{{FullPath: helper.KFullPathTaskReboot}},
 			nil,
 		)
+		return nil
 	},
 }
 

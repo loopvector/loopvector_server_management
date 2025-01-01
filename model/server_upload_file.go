@@ -17,11 +17,11 @@ type ServerUploadFile struct {
 }
 
 func (ServerUploadFile) Initialize() {
-	DB.AutoMigrate(&ServerUploadFile{})
+	GetDB().AutoMigrate(&ServerUploadFile{})
 }
 
 func (s ServerUploadFile) AddNew() error {
-	if err := DB.Create(&s).Error; err != nil {
+	if err := GetDB().Create(&s).Error; err != nil {
 		return err
 	}
 	return nil

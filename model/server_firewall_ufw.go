@@ -12,11 +12,11 @@ type ServerFirewallUfw struct {
 }
 
 func (ServerFirewallUfw) Initialize() {
-	DB.AutoMigrate(&ServerFirewallUfw{})
+	GetDB().AutoMigrate(&ServerFirewallUfw{})
 }
 
 func (s ServerFirewallUfw) Update() error {
-	if err := DB.FirstOrCreate(&s, &ServerFirewallUfw{
+	if err := GetDB().FirstOrCreate(&s, &ServerFirewallUfw{
 		ServerID:                  s.ServerID,
 		ServerFirewallUfwRuleName: s.ServerFirewallUfwRuleName,
 	}).Assign(&s).Error; err != nil {

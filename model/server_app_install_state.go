@@ -30,8 +30,8 @@ var serverAppInstallStates = []ServerAppInstallState{
 }
 
 func (ServerAppInstallState) Initialize() {
-	DB.AutoMigrate(&ServerAppInstallState{})
+	GetDB().AutoMigrate(&ServerAppInstallState{})
 	for _, state := range serverAppInstallStates {
-		DB.Where(&ServerAppInstallState{Name: state.Name}).FirstOrCreate(&state)
+		GetDB().Where(&ServerAppInstallState{Name: state.Name}).FirstOrCreate(&state)
 	}
 }

@@ -1,0 +1,5 @@
+- include_tasks: configure/service/start_service.yaml
+  name: Start services
+  vars: 
+    service_name: "{{ item }}"
+  loop: "{{ service_names }}"

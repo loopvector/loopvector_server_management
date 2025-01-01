@@ -1,23 +1,20 @@
 /*
 Copyright © 2024 Agilan Anandan <agilan@loopvector.com>
 */
-package cmd_action_install
+package cmd
 
 import (
 	"loopvector_server_management/cmd/cmd_action"
+	"loopvector_server_management/cmd/cmd_action/cmd_action_service"
 	"loopvector_server_management/controller"
 	"loopvector_server_management/model"
 
 	"github.com/spf13/cobra"
 )
 
-var (
-	appsToInstallList []string
-)
-
-// installCmd represents the install command
-var installCmd = &cobra.Command{
-	Use:   "install",
+// restartCmd represents the restart command
+var restartCmd = &cobra.Command{
+	Use:   "restart",
 	Short: "A brief description of your command",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
@@ -27,17 +24,15 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Args: cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		controller.InstallServerApps(
+		controller.RestartServices(
 			model.ServerNameModel{Name: cmd_action.ServerName},
-			appsToInstallList,
+			controller.ServiceActionRequest{
+				ServiceNames: cmd_action_service.ServiceNames,
+			},
 		)
 	},
 }
 
 func init() {
-	cmd_action.GetActionCmd().AddCommand(installCmd)
-
-	installCmd.Flags().StringSliceVar(&appsToInstallList, "apps", []string{}, "install the list of apps to the server")
-
-	installCmd.MarkFlagRequired("apps")
+	cmd_action_service.GetActionServiceCmd().AddCommand(restartCmd)
 }

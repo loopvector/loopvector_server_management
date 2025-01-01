@@ -14,11 +14,11 @@ type ServerRootUser struct {
 }
 
 func (ServerRootUser) Initialize() {
-	DB.AutoMigrate(&ServerRootUser{})
+	GetDB().AutoMigrate(&ServerRootUser{})
 }
 
 func (ru *ServerRootUser) CreateNew() error {
-	if err := DB.Create(&ru).Error; err != nil {
+	if err := GetDB().Create(&ru).Error; err != nil {
 		log.Fatalf("failed to create server: %v", err)
 		return err
 	}
@@ -26,7 +26,7 @@ func (ru *ServerRootUser) CreateNew() error {
 }
 
 func (ru ServerRootUser) UpdatePassword() error {
-	if err := DB.Where(&ServerRootUser{ServerID: ru.ServerID}).Updates(ServerRootUser{Password: ru.Password}).Error; err != nil {
+	if err := GetDB().Where(&ServerRootUser{ServerID: ru.ServerID}).Updates(ServerRootUser{Password: ru.Password}).Error; err != nil {
 		log.Fatalf("failed to update password: %v", err)
 		return err
 	}
@@ -35,7 +35,7 @@ func (ru ServerRootUser) UpdatePassword() error {
 
 func (s *ServerRootUser) GetUsingServerId() (ServerRootUser, error) {
 	var serverRootUser ServerRootUser
-	if err := DB.Where(&ServerRootUser{ServerID: s.ServerID}).Find(&serverRootUser).Error; err != nil {
+	if err := GetDB().Where(&ServerRootUser{ServerID: s.ServerID}).Find(&serverRootUser).Error; err != nil {
 		return ServerRootUser{}, err
 	}
 	return serverRootUser, nil

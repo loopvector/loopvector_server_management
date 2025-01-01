@@ -19,11 +19,11 @@ type ServerUser struct {
 }
 
 func (ServerUser) Initialize() {
-	DB.AutoMigrate(&ServerUser{})
+	GetDB().AutoMigrate(&ServerUser{})
 }
 
 func (u *ServerUser) CreateNew() error {
-	if err := DB.Where(&ServerUser{ServerID: u.ServerID, Username: u.Username}).
+	if err := GetDB().Where(&ServerUser{ServerID: u.ServerID, Username: u.Username}).
 		Attrs(&ServerUser{ServerUserActiveStateName: ServerUserActiveState{}.GetServerUserActiveStateData().Name}).
 		FirstOrCreate(&u).Error; err != nil {
 		return err
@@ -32,7 +32,7 @@ func (u *ServerUser) CreateNew() error {
 }
 
 // func (u *ServerUser) Remove() error {
-// 	if err := DB.Where(&ServerUser{ServerID: u.ServerID, Username: u.Username}).
+// 	if err := GetDB().Where(&ServerUser{ServerID: u.ServerID, Username: u.Username}).
 // 		Attrs(&ServerUser{ServerUserActiveStateName: ServerUserActiveState{}.GetServerUserNotActiveStateData().Name}).
 // 		FirstOrCreate(&u).Error; err != nil {
 // 		return err

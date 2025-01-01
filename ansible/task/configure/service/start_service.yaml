@@ -1,0 +1,6 @@
+- name: "start service {{ service_name }}"
+  become: true
+  service:
+    name: "{{ service_name }}"
+    state: started
+  when: service_name != ""  

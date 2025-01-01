@@ -4,7 +4,6 @@ Copyright © 2024 Agilan Anandan <agilan@loopvector.com>
 package cmd_action_group_add
 
 import (
-	"fmt"
 	"loopvector_server_management/cmd/cmd_action/cmd_action_group"
 	"loopvector_server_management/controller"
 
@@ -27,11 +26,11 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		suggestions, err := controller.GetAllActiveServerNames()
-		if err != nil {
-			fmt.Println("Error querying database:", err)
-			return nil, cobra.ShellCompDirectiveError
-		}
+		suggestions := controller.GetAllActiveServerNames()
+		// if err != nil {
+		// 	fmt.Println("Error querying database:", err)
+		// 	return nil, cobra.ShellCompDirectiveError
+		// }
 
 		return suggestions, cobra.ShellCompDirectiveNoFileComp
 	},

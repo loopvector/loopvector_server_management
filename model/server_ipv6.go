@@ -13,11 +13,11 @@ type ServerIpv6 struct {
 }
 
 func (ServerIpv6) Initialize() {
-	DB.AutoMigrate(&ServerIpv6{})
+	GetDB().AutoMigrate(&ServerIpv6{})
 }
 
 func (ipv6 *ServerIpv6) CreateNew() error {
-	if err := DB.Create(&ipv6).Error; err != nil {
+	if err := GetDB().Create(&ipv6).Error; err != nil {
 		log.Fatalf("failed to create server: %v", err)
 		return err
 	}

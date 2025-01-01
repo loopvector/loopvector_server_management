@@ -30,8 +30,8 @@ var serverUserActiveStates = []ServerUserActiveState{
 }
 
 func (ServerUserActiveState) Initialize() {
-	DB.AutoMigrate(&ServerUserActiveState{})
+	GetDB().AutoMigrate(&ServerUserActiveState{})
 	for _, state := range serverUserActiveStates {
-		DB.Where(&ServerUserActiveState{Name: state.Name}).FirstOrCreate(&state)
+		GetDB().Where(&ServerUserActiveState{Name: state.Name}).FirstOrCreate(&state)
 	}
 }

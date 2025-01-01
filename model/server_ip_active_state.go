@@ -30,8 +30,8 @@ var serverIpActiveStates = []ServerIpActiveState{
 }
 
 func (ServerIpActiveState) Initialize() {
-	DB.AutoMigrate(&ServerIpActiveState{})
+	GetDB().AutoMigrate(&ServerIpActiveState{})
 	for _, state := range serverIpActiveStates {
-		DB.Where(&ServerIpActiveState{Name: state.Name}).FirstOrCreate(&state)
+		GetDB().Where(&ServerIpActiveState{Name: state.Name}).FirstOrCreate(&state)
 	}
 }

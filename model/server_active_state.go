@@ -30,16 +30,16 @@ var serverActiveStates = []ServerActiveState{
 }
 
 func (ServerActiveState) Initialize() {
-	DB.AutoMigrate(&ServerActiveState{})
+	GetDB().AutoMigrate(&ServerActiveState{})
 	for _, state := range serverActiveStates {
-		DB.Where(&ServerActiveState{Name: state.Name}).FirstOrCreate(&state)
+		GetDB().Where(&ServerActiveState{Name: state.Name}).FirstOrCreate(&state)
 	}
 }
 
 func (sas ServerActiveState) GetServerActiveStateIDUsingName() uint64 {
 	var result ServerActiveState
 	println("sas.Name: ", sas.Name)
-	if err := DB.Where(&ServerActiveState{Name: sas.Name}).Select("id").First(&result).Error; err != nil {
+	if err := GetDB().Where(&ServerActiveState{Name: sas.Name}).Select("id").First(&result).Error; err != nil {
 		println("Error fetching ID: ", err.Error()) // Log the error for debugging
 		return 0
 	}
