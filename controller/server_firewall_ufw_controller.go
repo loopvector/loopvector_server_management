@@ -89,11 +89,20 @@ const (
 	UfwTrafficPolicyDeny  = "deny"
 )
 
-func SetDefaultIncomingUfwTrafficPolicy(serverName model.ServerNameModel, trafficPolicy UfwTrafficPolicy) error {
+func SetDefaultIncomingUfwTrafficPolicy(
+	serverName model.ServerNameModel,
+	serverSshConnectionInfo model.ServerSshConnectionInfo,
+	trafficPolicy UfwTrafficPolicy,
+) error {
 	vars := map[string]interface{}{
 		"traffic_policy": trafficPolicy.Policy,
 	}
-	return _runAnsibleTask(serverName, vars, helper.KFullPathTaskUfwDefaultIncomingConfigure)
+	return _runAnsibleTask(
+		serverName,
+		serverSshConnectionInfo,
+		vars,
+		helper.KFullPathTaskUfwDefaultIncomingConfigure,
+	)
 }
 
 // func DenyDefaultIncomingUfwTrafficPolicy(serverName model.ServerNameModel) error {
@@ -103,11 +112,20 @@ func SetDefaultIncomingUfwTrafficPolicy(serverName model.ServerNameModel, traffi
 // 	return _runAnsibleTask(serverName, vars, helper.KFullPathTaskUfwDefaultIncomingConfigure)
 // }
 
-func SetDefaultOutgoingUfwTrafficPolicy(serverName model.ServerNameModel, trafficPolicy UfwTrafficPolicy) error {
+func SetDefaultOutgoingUfwTrafficPolicy(
+	serverName model.ServerNameModel,
+	serverSshConnectionInfo model.ServerSshConnectionInfo,
+	trafficPolicy UfwTrafficPolicy,
+) error {
 	vars := map[string]interface{}{
 		"traffic_policy": trafficPolicy.Policy,
 	}
-	return _runAnsibleTask(serverName, vars, helper.KFullPathTaskUfwDefaultOutgoingConfigure)
+	return _runAnsibleTask(
+		serverName,
+		serverSshConnectionInfo,
+		vars,
+		helper.KFullPathTaskUfwDefaultOutgoingConfigure,
+	)
 }
 
 // func DenyDefaultOutgoingUfwTrafficPolicy(serverName model.ServerNameModel) error {
@@ -117,21 +135,43 @@ func SetDefaultOutgoingUfwTrafficPolicy(serverName model.ServerNameModel, traffi
 // 	return _runAnsibleTask(serverName, vars, helper.KFullPathTaskUfwDefaultOutgoingConfigure)
 // }
 
-func EnableUfw(serverName model.ServerNameModel) error {
-	return _runAnsibleTask(serverName, nil, helper.KFullPathTaskUfwEnable)
+func EnableUfw(
+	serverName model.ServerNameModel,
+	serverSshConnectionInfo model.ServerSshConnectionInfo,
+) error {
+	return _runAnsibleTask(
+		serverName,
+		serverSshConnectionInfo,
+		nil,
+		helper.KFullPathTaskUfwEnable,
+	)
 }
 
-func DisableUfw(serverName model.ServerNameModel) error {
-	return _runAnsibleTask(serverName, nil, helper.KFullPathTaskUfwDisable)
+func DisableUfw(
+	serverName model.ServerNameModel,
+	serverSshConnectionInfo model.ServerSshConnectionInfo,
+) error {
+	return _runAnsibleTask(
+		serverName,
+		serverSshConnectionInfo,
+		nil,
+		helper.KFullPathTaskUfwDisable,
+	)
 }
 
 func SetUfwPorts(
 	serverName model.ServerNameModel,
+	serverSshConnectionInfo model.ServerSshConnectionInfo,
 	ufwPorts []UfwPortsTrafficPolicyRequest,
 	trafficPolicy UfwTrafficPolicy,
 ) error {
 	vars := _buildUfwPortsTrafficPolicyRequestMap(trafficPolicy.Policy, ufwPorts)
-	return _runAnsibleTask(serverName, vars, helper.KFullPathTaskUfwPortsConfigure)
+	return _runAnsibleTask(
+		serverName,
+		serverSshConnectionInfo,
+		vars,
+		helper.KFullPathTaskUfwPortsConfigure,
+	)
 }
 
 // func DenyUfwPorts(
@@ -144,11 +184,20 @@ func SetUfwPorts(
 
 func SetUfwIpAddresses(
 	serverName model.ServerNameModel,
+	serverSshConnectionInfo model.ServerSshConnectionInfo,
 	ufwIpAddresses []UfwIpAddressesTrafficPolicyRequest,
 	trafficPolicy UfwTrafficPolicy,
 ) error {
-	vars := _buildUfwIpAddressesTrafficPolicyRequestMap(trafficPolicy.Policy, ufwIpAddresses)
-	return _runAnsibleTask(serverName, vars, helper.KFullPathTaskUfwIpAddressesConfigure)
+	vars := _buildUfwIpAddressesTrafficPolicyRequestMap(
+		trafficPolicy.Policy,
+		ufwIpAddresses,
+	)
+	return _runAnsibleTask(
+		serverName,
+		serverSshConnectionInfo,
+		vars,
+		helper.KFullPathTaskUfwIpAddressesConfigure,
+	)
 }
 
 // func DenyUfwIpAddresses(
@@ -161,11 +210,20 @@ func SetUfwIpAddresses(
 
 func SetUfwIpAddressesWithPort(
 	serverName model.ServerNameModel,
+	serverSshConnectionInfo model.ServerSshConnectionInfo,
 	ufwIpAddressesWithPort []UfwIpAddressesWithPortTrafficPolicyRequest,
 	trafficPolicy UfwTrafficPolicy,
 ) error {
-	vars := _buildUfwIpAddressesWithPortTrafficPolicyRequestMap(trafficPolicy.Policy, ufwIpAddressesWithPort)
-	return _runAnsibleTask(serverName, vars, helper.KFullPathTaskUfwIpAddressesWithPortConfigure)
+	vars := _buildUfwIpAddressesWithPortTrafficPolicyRequestMap(
+		trafficPolicy.Policy,
+		ufwIpAddressesWithPort,
+	)
+	return _runAnsibleTask(
+		serverName,
+		serverSshConnectionInfo,
+		vars,
+		helper.KFullPathTaskUfwIpAddressesWithPortConfigure,
+	)
 }
 
 // func DenyUfwIpAddressesWithPort(
@@ -178,11 +236,13 @@ func SetUfwIpAddressesWithPort(
 
 func _runAnsibleTask(
 	serverName model.ServerNameModel,
+	serverSshConnectionInfo model.ServerSshConnectionInfo,
 	vars map[string]interface{},
 	taskFullPath string,
 ) error {
 	_, err := RunAnsibleTasks(
 		serverName,
+		serverSshConnectionInfo,
 		[]model.AnsibleTask{{
 			FullPath: taskFullPath,
 			Vars:     vars,

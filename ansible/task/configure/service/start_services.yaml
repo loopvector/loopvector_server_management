@@ -1,4 +1,4 @@
-- include_tasks: configure/service/start_service.yaml
+- include_tasks: start_service.yaml
   name: Start services
   vars: 
     service_name: "{{ item }}"

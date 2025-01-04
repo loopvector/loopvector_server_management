@@ -32,6 +32,7 @@ const KFullPathTaskAddUsers = "task/configure/user/add_users.yaml"
 const KFullPathTaskAddUser = "task/configure/user/add_user.yaml"
 
 const KFullPathTaskAddLinesToFile = "task/configure/file/add_lines.yaml"
+const KFullPathTaskAddLineBlockToFile = "task/configure/file/add_line_block.yaml"
 
 const KFullPathTaskAddGroups = "task/configure/group/add_groups.yaml"
 const KFullPathTaskAddGroup = "task/configure/group/add_group.yaml"

@@ -22,13 +22,21 @@ func (ServerUser) Initialize() {
 	GetDB().AutoMigrate(&ServerUser{})
 }
 
-func (u *ServerUser) CreateNew() error {
+func (u ServerUser) CreateNewIfItDoesNotExist() error {
 	if err := GetDB().Where(&ServerUser{ServerID: u.ServerID, Username: u.Username}).
 		Attrs(&ServerUser{ServerUserActiveStateName: ServerUserActiveState{}.GetServerUserActiveStateData().Name}).
 		FirstOrCreate(&u).Error; err != nil {
 		return err
 	}
 	return nil
+}
+
+func (u ServerUser) GetUsingServerIdAndUsername() (ServerUser, error) {
+	var serverUser ServerUser
+	if err := GetDB().Where(&ServerUser{ServerID: u.ServerID, Username: u.Username}).First(&serverUser).Error; err != nil {
+		return ServerUser{}, err
+	}
+	return serverUser, nil
 }
 
 // func (u *ServerUser) Remove() error {

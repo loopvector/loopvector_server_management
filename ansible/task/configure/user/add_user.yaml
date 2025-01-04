@@ -3,7 +3,7 @@
   register: user_id
   ignore_errors: yes
 
-- name: Create user if it does not exist
+- name: "create user {{ user_name }} if it does not exist"
   user:
     name: "{{ user_name }}"
     password: "{{ user_password | password_hash('sha512') }}"

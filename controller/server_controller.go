@@ -77,7 +77,7 @@ func CreateNewServer(createServerRequest CreateServerRequest) {
 			SshKey:                    createServerRequest.RootUserSSHKey,
 			ServerUserActiveStateName: model.ServerUserActiveState{}.GetServerUserActiveStateData().Name,
 		}
-		err = adminUser.CreateNew()
+		err = adminUser.CreateNewIfItDoesNotExist()
 		if err != nil {
 			panic(err)
 		}

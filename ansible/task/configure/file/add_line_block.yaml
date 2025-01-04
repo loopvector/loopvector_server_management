@@ -1,0 +1,53 @@
+- name: "Add multiple lines to a file if the block does not exist"
+  become: "{{ should_become }}"
+  blockinfile:
+    path: "{{ file_path }}"
+    marker: "# {mark} LSM MANAGED BLOCK: BLOCK_{{ timestamp }}"
+    block: |
+      {% for line in lines_to_add %}
+      {{ line }}
+      {% endfor %}
+    create: yes
+  when: mode == ""  # Run this task if mode is empty
+  vars:
+    timestamp: "{{ lookup('pipe', 'date +%s%N') }}"
+
+- name: "Add a line to a file if it does not exist and set permissions"
+  become: "{{ should_become }}"
+  blockinfile:
+    path: "{{ file_path }}"
+    marker: "# {mark} LSM MANAGED BLOCK: BLOCK_{{ timestamp }}"
+    block: |
+      {% for line in lines_to_add %}
+      {{ line }}
+      {% endfor %}
+    create: yes
+    mode: "{{ mode }}"
+  when: mode != ""  # Run this task if mode is provided
+  vars:
+    timestamp: "{{ lookup('pipe', 'date +%s%N') }}"
+
+- name: "Set ownership of the file if owner_user is provided"
+  become: "{{ should_become }}"
+  file:
+    path: "{{ file_path }}"
+    owner: "{{ owner_user | default(omit) }}"  # Omit if owner_user is not provided
+    group: "{{ owner_user | default(omit) }}"  # Omit if owner_user is not provided
+  when: owner_user is defined and owner_user != ""
+
+- name: "Set mode for the parent directory"
+  become: "{{ should_become }}"
+  file:
+    path: "{{ file_path | dirname }}"
+    mode: "{{ dir_mode }}"
+    state: directory
+  when: dir_mode is defined and dir_mode != ""
+
+- name: "Set ownership of the file dir if dir_owner_user is provided"
+  become: "{{ should_become }}"
+  file:
+    path: "{{ file_path | dirname }}"
+    owner: "{{ dir_owner_user | default(omit) }}"  # Omit if dir_owner_user is not provided
+    group: "{{ dir_owner_user | default(omit) }}"  # Omit if dir_owner_user is not provided
+    state: directory
+  when: dir_owner_user is defined and dir_owner_user != ""   

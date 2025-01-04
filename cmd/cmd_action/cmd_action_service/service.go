@@ -11,7 +11,8 @@ import (
 )
 
 var (
-	ServiceNames []string
+	serviceNames []string
+	serviceName  string
 )
 
 func GetActionServiceCmd() *cobra.Command {
@@ -33,10 +34,25 @@ to quickly create a Cobra application.`,
 	},
 }
 
+func GetAllServiceNames() []string {
+	var allServiceNames []string
+	if serviceName != "" {
+		allServiceNames = append(allServiceNames, serviceName)
+	}
+	if serviceNames != nil && len(serviceNames) > 0 {
+		allServiceNames = append(allServiceNames, serviceNames...)
+	}
+	return allServiceNames
+}
+
 func init() {
 	cmd_action.GetActionCmd().AddCommand(serviceCmd)
 
-	serviceCmd.PersistentFlags().StringSliceVar(&ServiceNames, "serviceNames", []string{}, "Service names that has to be acted upon")
+	serviceCmd.PersistentFlags().StringSliceVar(&serviceNames, "serviceNames", []string{}, "Service names that has to be acted upon")
+	serviceCmd.PersistentFlags().StringVar(&serviceName, "serviceName", "", "Service names that has to be acted upon")
+
+	serviceCmd.MarkFlagsOneRequired("serviceNames", "serviceName")
+	serviceCmd.MarkFlagsOneRequired("serviceNames", "serviceName")
 
 	// Here you will define your flags and configuration settings.
 

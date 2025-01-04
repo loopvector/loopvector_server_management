@@ -1,0 +1,37 @@
+- name: "Read LSM managed blocks and print them as JSON"
+  become: "{{ should_become }}"
+  shell: |
+    awk '
+    BEGIN {
+      print "{"
+      first = 1
+    }
+    /^# BEGIN LSM MANAGED BLOCK: BLOCK_/ {
+      block_id = $NF
+      sub("BLOCK_", "", block_id)
+      if (!first) {
+        print ","
+      }
+      printf "\"%s\": \"", block_id
+      first = 0
+      current_block = block_id
+      next
+    }
+    /^# END LSM MANAGED BLOCK: BLOCK_/ {
+      printf "\""
+      current_block = ""
+      next
+    }
+    current_block != "" {
+      gsub("\"", "\\\"")  # Escape double quotes for JSON
+      printf "%s\\n", $0
+    }
+    END {
+      print "\n}"
+    }
+    ' "{{ file_path }}"
+  register: managed_blocks_json
+
+- name: "Print managed blocks as JSON"
+  debug:
+    msg: "{{ managed_blocks_json.stdout }}"

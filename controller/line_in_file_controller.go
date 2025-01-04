@@ -9,6 +9,10 @@ type LineToFileAddRequest struct {
 	Line string
 }
 
+type LineBlockToFileAddRequest struct {
+	Block string
+}
+
 type AddLinesToFileRequest struct {
 	FileFullPath      string
 	FilePermission    string
@@ -19,18 +23,52 @@ type AddLinesToFileRequest struct {
 	//FilePathOwner     string
 }
 
+func AddLineBlockToFile(
+	serverName model.ServerNameModel,
+	serverSshConnectionInfo model.ServerSshConnectionInfo,
+	addLinesToFileRequest AddLinesToFileRequest,
+	lines []LineToFileAddRequest,
+) error {
+
+	var linesToAddVar []string
+	for _, sudoerEntry := range lines {
+		linesToAddVar = append(linesToAddVar, sudoerEntry.Line)
+	}
+
+	vars := map[string]interface{}{
+		"lines_to_add":   linesToAddVar,
+		"mode":           addLinesToFileRequest.FilePermission,
+		"file_path":      addLinesToFileRequest.FileFullPath,
+		"should_become":  addLinesToFileRequest.AsSudo,
+		"owner_user":     addLinesToFileRequest.FileOwnerUsername,
+		"dir_mode":       addLinesToFileRequest.FileDirPermission,
+		"dir_owner_user": addLinesToFileRequest.FileDirOwner,
+	}
+
+	_, err := RunAnsibleTasks(
+		serverName,
+		serverSshConnectionInfo,
+		[]model.AnsibleTask{{
+			FullPath: helper.KFullPathTaskAddLineBlockToFile,
+			Vars:     vars,
+		}},
+		nil,
+	)
+
+	if err != nil {
+		panic(err)
+	}
+
+	return nil
+
+}
+
 func AddLinesToFile(
-	serverName string,
+	serverName model.ServerNameModel,
+	serverSshConnectionInfo model.ServerSshConnectionInfo,
 	addLinesToFileRequest AddLinesToFileRequest,
 	sudoerEntries []LineToFileAddRequest,
 ) error {
-	serverNameModel := model.ServerNameModel{Name: serverName}
-
-	// serverId, err := serverNameModel.GetServerIdUsingServerName()
-	// if err != nil {
-	// 	panic(err)
-	// }
-
 	var linesToAddVar []string
 	for _, sudoerEntry := range sudoerEntries {
 		linesToAddVar = append(linesToAddVar, sudoerEntry.Line)
@@ -46,7 +84,8 @@ func AddLinesToFile(
 	}
 
 	_, err := RunAnsibleTasks(
-		serverNameModel,
+		serverName,
+		serverSshConnectionInfo,
 		[]model.AnsibleTask{{
 			FullPath: helper.KFullPathTaskAddLinesToFile,
 			Vars:     vars,

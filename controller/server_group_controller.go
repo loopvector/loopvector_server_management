@@ -5,10 +5,12 @@ import (
 	"loopvector_server_management/model"
 )
 
-func AddGroupsToServer(serverName string, groupNames []string) {
-	serverNameModel := model.ServerNameModel{Name: serverName}
-
-	serverId, err := serverNameModel.GetServerIdUsingServerName()
+func AddGroupsToServer(
+	serverName model.ServerNameModel,
+	serverSshConnectionInfo model.ServerSshConnectionInfo,
+	groupNames []string,
+) {
+	serverId, err := serverName.GetServerIdUsingServerName()
 	if err != nil {
 		panic(err)
 	}
@@ -23,21 +25,22 @@ func AddGroupsToServer(serverName string, groupNames []string) {
 		callbacks = append(callbacks, RunAnsibleTaskCallback{
 			TaskName: "create group " + group,
 			OnChanged: func() {
-				println("Added group ", group, " to ", serverName)
+				// println("Added group ", group, " to ", serverName.Name)
 				model.ServerIDModel{ID: serverId}.AddGroup(model.ServerGroup{ServerID: serverId, Name: group})
 			},
 			OnUnchanged: func() {
-				println("Already added group ", group, " to ", serverName)
+				// println("Already added group ", group, " to ", serverName.Name)
 				model.ServerIDModel{ID: serverId}.AddGroup(model.ServerGroup{ServerID: serverId, Name: group})
 			},
 			OnFailed: func() {
-				println("Failed to add group ", group, " to ", serverName)
+				// println("Failed to add group ", group, " to ", serverName.Name)
 			},
 		})
 	}
 
 	_, err = RunAnsibleTasks(
-		serverNameModel,
+		serverName,
+		serverSshConnectionInfo,
 		[]model.AnsibleTask{{
 			FullPath: helper.KFullPathTaskAddGroups,
 			Vars:     vars,

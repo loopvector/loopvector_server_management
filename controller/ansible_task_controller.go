@@ -11,37 +11,46 @@ type RunAnsibleTaskCallback struct {
 
 func RunSimpleAnsibleTasks(
 	serverName model.ServerNameModel,
+	serverSshConnectionInfo model.ServerSshConnectionInfo,
 	taskFullPath string,
 	vars map[string]interface{},
-	// varsArray []map[string]interface{},
 	callback *RunAnsibleTaskCallback,
 ) (model.AnsiblePlaybookRunResult, error) {
+	callbacks := []RunAnsibleTaskCallback{}
+	if callback != nil {
+		callbacks = append(callbacks, *callback)
+	} else {
+		callbacks = nil
+	}
 	return RunAnsibleTasks(
 		serverName,
+		serverSshConnectionInfo,
 		[]model.AnsibleTask{{
 			FullPath: taskFullPath,
 			Vars:     vars,
-			// VarsArray: varsArray,
 		}},
-		[]RunAnsibleTaskCallback{*callback},
+		callbacks,
 	)
 }
 
 func RunAnsibleTasks(
 	serverName model.ServerNameModel,
+	serverSshConnectionInfo model.ServerSshConnectionInfo,
 	ansibleTasks []model.AnsibleTask,
 	callbacks []RunAnsibleTaskCallback,
 ) (model.AnsiblePlaybookRunResult, error) {
-	serverRootUser, serverIpv4, err := serverName.GetServerRootUserIpv4UsingServerName()
-	if err != nil {
-		panic(err)
-	}
+	// serverRootUser, serverIpv4, err := serverName.GetServerRootUserIpv4UsingServerName()
+	// if err != nil {
+	// 	panic(err)
+	// }
 
-	err = model.AnsibleInventoryFileRootUserIpv4{
-		ServerName:     serverName.Name,
-		ServerIpv4:     serverIpv4,
-		ServerRootUser: serverRootUser,
-	}.CreateNewUsingRootUserAndIpv4()
+	// err = model.AnsibleInventoryFileRootUserIpv4{
+	// 	ServerName:     serverName.Name,
+	// 	ServerIpv4:     serverIpv4,
+	// 	ServerRootUser: serverRootUser,
+	// }.CreateNewUsingRootUserAndIpv4()
+
+	err := serverSshConnectionInfo.CreateNew()
 
 	if err != nil {
 		panic(err)

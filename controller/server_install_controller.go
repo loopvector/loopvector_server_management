@@ -5,7 +5,11 @@ import (
 	"loopvector_server_management/model"
 )
 
-func InstallServerApps(serverName model.ServerNameModel, appsToInstall []string) error {
+func InstallServerApps(
+	serverName model.ServerNameModel,
+	serverSshConnectionInfo model.ServerSshConnectionInfo,
+	appsToInstall []string,
+) error {
 	vars := map[string]interface{}{
 		"package_names": appsToInstall,
 	}
@@ -45,6 +49,7 @@ func InstallServerApps(serverName model.ServerNameModel, appsToInstall []string)
 
 	_, err = RunAnsibleTasks(
 		serverName,
+		serverSshConnectionInfo,
 		[]model.AnsibleTask{{FullPath: helper.KFullPathTaskInstallApps, Vars: vars}},
 		callbacks,
 	)

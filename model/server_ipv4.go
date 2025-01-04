@@ -31,3 +31,11 @@ func (s *ServerIpv4) GetUsingServerId() (ServerIpv4, error) {
 	}
 	return serverIpv4Details, nil
 }
+
+func (s ServerIpv4) GetServerIpv4UsingIpAddress() (ServerIpv4, error) {
+	var serverIpv4Details ServerIpv4
+	if err := GetDB().Where(&ServerIpv4{Ip: s.Ip}).First(&serverIpv4Details).Error; err != nil {
+		return ServerIpv4{}, err
+	}
+	return serverIpv4Details, nil
+}

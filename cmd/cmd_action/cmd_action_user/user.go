@@ -6,8 +6,18 @@ package cmd_action_user
 import (
 	"fmt"
 	"loopvector_server_management/cmd/cmd_action"
+	"loopvector_server_management/controller"
 
 	"github.com/spf13/cobra"
+)
+
+var (
+	username  string
+	password  string
+	usernames []string
+	passwords []string
+	group     string
+	groups    []string
 )
 
 func GetActionUserCmd() *cobra.Command {
@@ -29,16 +39,64 @@ to quickly create a Cobra application.`,
 	},
 }
 
+func GetAllUsersToAdd() []controller.AddUsersToServerRequest {
+	allUsers := []controller.AddUsersToServerRequest{}
+
+	if username != "" && password != "" {
+		allUsers = append(
+			allUsers,
+			controller.AddUsersToServerRequest{
+				Username: username,
+				Password: password,
+				Groups:   _getGroups(),
+			},
+		)
+	} else {
+		if len(usernames) != len(passwords) {
+			panic("number of usernames and passwords must be the same")
+		}
+		for i := 0; i < len(usernames); i++ {
+			allUsers = append(
+				allUsers,
+				controller.AddUsersToServerRequest{
+					Username: usernames[i],
+					Password: passwords[i],
+					Groups:   _getGroups(),
+				},
+			)
+		}
+	}
+
+	return allUsers
+}
+
+func _getGroups() []string {
+	allGroups := []string{}
+	if group != "" {
+		allGroups = append(allGroups, group)
+	} else if len(groups) > 0 {
+		allGroups = append(allGroups, groups...)
+	}
+	return allGroups
+}
+
 func init() {
 	cmd_action.GetActionCmd().AddCommand(userCmd)
 
-	// Here you will define your flags and configuration settings.
+	userCmd.PersistentFlags().StringVar(&username, "username", "", "username of the user to be added to the server")
+	userCmd.PersistentFlags().StringVar(&password, "password", "", "password of the user to be added to the server")
 
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// userCmd.PersistentFlags().String("foo", "", "A help for foo")
+	userCmd.MarkFlagsRequiredTogether("username", "password")
 
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// userCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	userCmd.PersistentFlags().StringSliceVar(&usernames, "usernames", []string{}, "username of the users to be added to the server")
+	userCmd.PersistentFlags().StringSliceVar(&passwords, "passwords", []string{}, "password of the users to be added to the server")
+
+	userCmd.MarkFlagsRequiredTogether("usernames", "passwords")
+
+	userCmd.PersistentFlags().StringVar(&group, "group", "", "group to which the user is to be added")
+	userCmd.PersistentFlags().StringSliceVar(&groups, "groups", []string{}, "groups to which the user is to be added")
+
+	userCmd.MarkFlagsMutuallyExclusive("group", "groups")
+
+	userCmd.MarkFlagsMutuallyExclusive("username", "usernames")
 }

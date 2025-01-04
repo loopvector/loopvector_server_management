@@ -2,6 +2,7 @@ package controller
 
 import (
 	"fmt"
+	"loopvector_server_management/model"
 )
 
 type SudoersAddRequest struct {
@@ -39,7 +40,8 @@ func _getLineFromRequest(sudoerEntry SudoersAddRequest) LineToFileAddRequest {
 }
 
 func AddASudoer(
-	serverName string,
+	serverName model.ServerNameModel,
+	serverSshConnectionInfo model.ServerSshConnectionInfo,
 	addLinesToFileRequest AddLinesToFileRequest,
 	sudoerEntry SudoersAddRequest,
 ) error {
@@ -48,8 +50,9 @@ func AddASudoer(
 		lines,
 		_getLineFromRequest(sudoerEntry),
 	)
-	AddLinesToFile(
+	AddLineBlockToFile(
 		serverName,
+		serverSshConnectionInfo,
 		addLinesToFileRequest,
 		lines,
 	)
@@ -57,7 +60,8 @@ func AddASudoer(
 }
 
 func AddSudoers(
-	serverName string,
+	serverName model.ServerNameModel,
+	serverSshConnectionInfo model.ServerSshConnectionInfo,
 	addLinesToFileRequest AddLinesToFileRequest,
 	sudoerEntries []SudoersAddRequest,
 ) error {
@@ -69,8 +73,9 @@ func AddSudoers(
 			_getLineFromRequest(sudoerEntry),
 		)
 	}
-	AddLinesToFile(
+	AddLineBlockToFile(
 		serverName,
+		serverSshConnectionInfo,
 		addLinesToFileRequest,
 		lines,
 	)

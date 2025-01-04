@@ -30,41 +30,52 @@ var (
 	protocol    string
 )
 
-func RunUfwTrafficPolicyCommandE(cmd *cobra.Command, args []string, trafficPolicy controller.UfwTrafficPolicy) error {
-	serverName := model.ServerNameModel{Name: args[0]}
+func RunUfwTrafficPolicyCommandE(
+	cmd *cobra.Command,
+	args []string,
+	serverName model.ServerNameModel,
+	serverSshConnectionInfo model.ServerSshConnectionInfo,
+	trafficPolicy controller.UfwTrafficPolicy,
+) error {
 	if ip != "" {
 		controller.SetUfwIpAddresses(
 			serverName,
+			serverSshConnectionInfo,
 			GetUfwIpAddressesTrafficPolicyRequest([]string{ip}, protocol),
 			trafficPolicy,
 		)
 	} else if len(ips) != 0 {
 		controller.SetUfwIpAddresses(
 			serverName,
+			serverSshConnectionInfo,
 			GetUfwIpAddressesTrafficPolicyRequest(ips, protocol),
 			trafficPolicy,
 		)
 	} else if ipWithPort != "" {
 		controller.SetUfwIpAddressesWithPort(
 			serverName,
+			serverSshConnectionInfo,
 			GetUfwIpAddressesWithPortTrafficPolicyRequest([]string{ipWithPort}, protocol),
 			trafficPolicy,
 		)
 	} else if len(ipsWithPort) != 0 {
 		controller.SetUfwIpAddressesWithPort(
 			serverName,
+			serverSshConnectionInfo,
 			GetUfwIpAddressesWithPortTrafficPolicyRequest(ipsWithPort, protocol),
 			trafficPolicy,
 		)
 	} else if port != "" {
 		controller.SetUfwPorts(
 			serverName,
+			serverSshConnectionInfo,
 			GetUfwPortsTrafficPolicyRequest([]string{port}, protocol),
 			trafficPolicy,
 		)
 	} else if len(ports) != 0 {
 		controller.SetUfwPorts(
 			serverName,
+			serverSshConnectionInfo,
 			GetUfwPortsTrafficPolicyRequest(ports, protocol),
 			trafficPolicy,
 		)

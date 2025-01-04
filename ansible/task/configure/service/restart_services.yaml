@@ -1,4 +1,4 @@
-- include_tasks: configure/service/restart_service.yaml
+- include_tasks: restart_service.yaml
   name: Restart services
   vars: 
     service_name: "{{ item }}"

@@ -25,7 +25,8 @@ to quickly create a Cobra application.`,
 	Args: cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		controller.RunAnsibleTasks(
-			model.ServerNameModel{Name: cmd_action.ServerName},
+			cmd_action.GetServerName(),
+			cmd_action.GetServerSshConnectionInfo(),
 			[]model.AnsibleTask{{FullPath: helper.KFullPathTaskReboot}},
 			nil,
 		)

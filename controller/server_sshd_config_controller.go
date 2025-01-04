@@ -2,6 +2,7 @@ package controller
 
 import (
 	"fmt"
+	"loopvector_server_management/model"
 )
 
 type SSHDConfigAddRequest struct {
@@ -39,14 +40,20 @@ func _generateSshdConfigLinesFromRequest(config SSHDConfigAddRequest) []LineToFi
 }
 
 func AddASshdConfig(
-	serverName string,
+	serverName model.ServerNameModel,
+	serverSshConnectionInfo model.ServerSshConnectionInfo,
 	addLinesToFileRequest AddLinesToFileRequest,
 	addSshdConfigRequest SSHDConfigAddRequest,
 ) error {
 	lines := _generateSshdConfigLinesFromRequest(addSshdConfigRequest)
-	lines = append(lines, LineToFileAddRequest{Line: "\n"})
-	AddLinesToFile(
+	// lines = append(lines, LineToFileAddRequest{Line: "\n"})
+	// var block string
+	// for _, line := range lines {
+	// 	block = block + line.Line
+	// }
+	AddLineBlockToFile(
 		serverName,
+		serverSshConnectionInfo,
 		addLinesToFileRequest,
 		lines,
 	)

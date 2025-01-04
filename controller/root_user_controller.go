@@ -9,18 +9,28 @@ type UpdateRootUserPasswordRequest struct {
 	NewRootPassword string
 }
 
-func UpdateRootUserPassword(serverName model.ServerNameModel, request UpdateRootUserPasswordRequest) error {
+func UpdateRootUserPassword(
+	serverName model.ServerNameModel,
+	serverSshConnectionInfo model.ServerSshConnectionInfo,
+	request UpdateRootUserPasswordRequest,
+) error {
 
 	vars := map[string]interface{}{
 		"new_root_password": request.NewRootPassword,
 		"unsafe":            true,
 	}
 
+	//println("update root password for serverName: ", serverName.Name)
+
 	callback := RunAnsibleTaskCallback{
 		TaskName: "update root password",
 		OnChanged: func() {
-			serverId := model.Server{ServerName: serverName.Name}.ServerActiveState.GetServerActiveStateIDUsingName()
-			err := model.ServerRootUser{ServerID: serverId, Password: request.NewRootPassword}.UpdatePassword()
+			serverId, err := serverName.GetServerIdUsingServerName()
+			if err != nil {
+				panic(err)
+			}
+			//println("update root password for serverId: ", serverId)
+			err = model.ServerRootUser{ServerID: serverId, Password: request.NewRootPassword}.UpdatePassword()
 			if err != nil {
 				panic(err)
 			}
@@ -35,6 +45,7 @@ func UpdateRootUserPassword(serverName model.ServerNameModel, request UpdateRoot
 
 	_, err := RunSimpleAnsibleTasks(
 		serverName,
+		serverSshConnectionInfo,
 		helper.KFullPathTaskChangeRootPassword,
 		vars,
 		// vars,

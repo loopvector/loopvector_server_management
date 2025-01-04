@@ -11,6 +11,7 @@ type ServiceActionRequest struct {
 
 func EnableServices(
 	serverName model.ServerNameModel,
+	serverSshConnectionInfo model.ServerSshConnectionInfo,
 	serviceNames ServiceActionRequest,
 ) error {
 	vars := map[string]interface{}{
@@ -19,6 +20,7 @@ func EnableServices(
 
 	_, err := RunSimpleAnsibleTasks(
 		serverName,
+		serverSshConnectionInfo,
 		helper.KFullPathTaskServiceEnable,
 		vars,
 		nil,
@@ -33,6 +35,7 @@ func EnableServices(
 
 func StartServices(
 	serverName model.ServerNameModel,
+	serverSshConnectionInfo model.ServerSshConnectionInfo,
 	serviceNames ServiceActionRequest,
 ) error {
 	vars := map[string]interface{}{
@@ -41,6 +44,7 @@ func StartServices(
 
 	_, err := RunSimpleAnsibleTasks(
 		serverName,
+		serverSshConnectionInfo,
 		helper.KFullPathTaskServiceStart,
 		vars,
 		nil,
@@ -55,6 +59,7 @@ func StartServices(
 
 func RestartServices(
 	serverName model.ServerNameModel,
+	serverSshConnectionInfo model.ServerSshConnectionInfo,
 	serviceNames ServiceActionRequest,
 ) error {
 	vars := map[string]interface{}{
@@ -63,6 +68,7 @@ func RestartServices(
 
 	_, err := RunSimpleAnsibleTasks(
 		serverName,
+		serverSshConnectionInfo,
 		helper.KFullPathTaskServiceRestart,
 		vars,
 		nil,

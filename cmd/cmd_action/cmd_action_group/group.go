@@ -10,6 +10,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var (
+	groupsToAdd []string
+	groupToAdd  string
+)
+
 func GetActionGroupCmd() *cobra.Command {
 	return groupCmd
 }
@@ -29,16 +34,22 @@ to quickly create a Cobra application.`,
 	},
 }
 
+func GetAllGroupsToAdd() []string {
+	var allGroupsToAdd []string
+	if groupToAdd != "" {
+		allGroupsToAdd = append(allGroupsToAdd, groupToAdd)
+	}
+	if len(groupsToAdd) > 0 {
+		allGroupsToAdd = append(allGroupsToAdd, groupsToAdd...)
+	}
+	return allGroupsToAdd
+}
+
 func init() {
 	cmd_action.GetActionCmd().AddCommand(groupCmd)
 
-	// Here you will define your flags and configuration settings.
+	groupCmd.PersistentFlags().StringSliceVar(&groupsToAdd, "groups", []string{}, "add the list of groups to the server")
+	groupCmd.PersistentFlags().StringVar(&groupToAdd, "group", "", "add the group to the server")
 
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// groupCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// groupCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	groupCmd.MarkFlagsOneRequired("groups", "group")
 }

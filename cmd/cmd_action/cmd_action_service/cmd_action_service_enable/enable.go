@@ -7,7 +7,6 @@ import (
 	"loopvector_server_management/cmd/cmd_action"
 	"loopvector_server_management/cmd/cmd_action/cmd_action_service"
 	"loopvector_server_management/controller"
-	"loopvector_server_management/model"
 
 	"github.com/spf13/cobra"
 )
@@ -25,9 +24,10 @@ to quickly create a Cobra application.`,
 	Args: cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		controller.EnableServices(
-			model.ServerNameModel{Name: cmd_action.ServerName},
+			cmd_action.GetServerName(),
+			cmd_action.GetServerSshConnectionInfo(),
 			controller.ServiceActionRequest{
-				ServiceNames: cmd_action_service.ServiceNames,
+				ServiceNames: cmd_action_service.GetAllServiceNames(),
 			},
 		)
 	},

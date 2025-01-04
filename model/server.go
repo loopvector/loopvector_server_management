@@ -91,6 +91,22 @@ func (s *ServerNameModel) GetRootUserUsingServerName() (ServerRootUser, error) {
 	return result, nil
 }
 
+func (s ServerNameModel) GetServerUserUsingServerName(username string) (ServerUser, error) {
+	serverId, err := s.GetServerIdUsingServerName()
+	if err != nil {
+		panic(err)
+	}
+	var serverUser = ServerUser{
+		ServerID: serverId,
+		Username: username,
+	}
+	result, err := serverUser.GetUsingServerIdAndUsername()
+	if err != nil {
+		panic(err)
+	}
+	return result, nil
+}
+
 func (s *ServerNameModel) GetIpv4UsingServerName() (ServerIpv4, error) {
 	serverId, err := s.GetServerIdUsingServerName()
 	if err != nil {
@@ -104,6 +120,30 @@ func (s *ServerNameModel) GetIpv4UsingServerName() (ServerIpv4, error) {
 		panic(err)
 	}
 	return result, nil
+}
+
+func (s *ServerNameModel) GetIpv6UsingServerName() (ServerIpv6, error) {
+	serverId, err := s.GetServerIdUsingServerName()
+	if err != nil {
+		panic(err)
+	}
+	var serverIpv6 = ServerIpv6{
+		ServerID: serverId,
+	}
+	result, err := serverIpv6.GetUsingServerId()
+	if err != nil {
+		panic(err)
+	}
+	return result, nil
+}
+
+func (s ServerNameModel) AddNewUser(user ServerUser) error {
+	serverId, err := s.GetServerIdUsingServerName()
+	if err != nil {
+		panic(err)
+	}
+	user.ServerID = serverId
+	return user.CreateNewIfItDoesNotExist()
 }
 
 // func (s *ServerNameModel) GetAppUsingServerName() (ServerApp, error) {

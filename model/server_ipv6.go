@@ -23,3 +23,19 @@ func (ipv6 *ServerIpv6) CreateNew() error {
 	}
 	return nil
 }
+
+func (s *ServerIpv6) GetUsingServerId() (ServerIpv6, error) {
+	var serverIpv6Details ServerIpv6
+	if err := GetDB().Where(&ServerIpv6{ServerID: s.ServerID}).Find(&serverIpv6Details).Error; err != nil {
+		return ServerIpv6{}, err
+	}
+	return serverIpv6Details, nil
+}
+
+func (s ServerIpv6) GetServerIpv6UsingIpAddress() (ServerIpv6, error) {
+	var serverIpv6Details ServerIpv6
+	if err := GetDB().Where(&ServerIpv6{Ip: s.Ip}).First(&serverIpv6Details).Error; err != nil {
+		return ServerIpv6{}, err
+	}
+	return serverIpv6Details, nil
+}

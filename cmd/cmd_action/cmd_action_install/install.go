@@ -6,7 +6,6 @@ package cmd_action_install
 import (
 	"loopvector_server_management/cmd/cmd_action"
 	"loopvector_server_management/controller"
-	"loopvector_server_management/model"
 
 	"github.com/spf13/cobra"
 )
@@ -28,7 +27,8 @@ to quickly create a Cobra application.`,
 	Args: cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		controller.InstallServerApps(
-			model.ServerNameModel{Name: cmd_action.ServerName},
+			cmd_action.GetServerName(),
+			cmd_action.GetServerSshConnectionInfo(),
 			appsToInstallList,
 		)
 	},

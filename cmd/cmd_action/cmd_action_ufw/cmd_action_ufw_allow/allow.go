@@ -4,6 +4,7 @@ Copyright © 2024 Agilan Anandan <agilan@loopvector.com>
 package cmd_action_ufw_allow
 
 import (
+	"loopvector_server_management/cmd/cmd_action"
 	"loopvector_server_management/cmd/cmd_action/cmd_action_ufw"
 	"loopvector_server_management/cmd/cmd_action/cmd_action_ufw/helper"
 	"loopvector_server_management/controller"
@@ -21,20 +22,13 @@ and usage of using your command. For example:
 Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
-	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		suggestions := controller.GetAllActiveServerNames()
-		// if err != nil {
-		// 	fmt.Println("Error querying database:", err)
-		// 	return nil, cobra.ShellCompDirectiveError
-		// }
-
-		return suggestions, cobra.ShellCompDirectiveNoFileComp
-	},
-	Args: cobra.MatchAll(cobra.ExactArgs(1), cobra.OnlyValidArgs),
+	Args: cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return helper.RunUfwTrafficPolicyCommandE(
 			cmd,
 			args,
+			cmd_action.GetServerName(),
+			cmd_action.GetServerSshConnectionInfo(),
 			controller.UfwTrafficPolicy{Policy: controller.UfwTrafficPolicyAllow},
 		)
 	},

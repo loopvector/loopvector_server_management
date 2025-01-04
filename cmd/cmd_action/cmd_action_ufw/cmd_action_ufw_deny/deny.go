@@ -4,6 +4,7 @@ Copyright © 2024 Agilan Anandan <agilan@loopvector.com>
 package cmd_action_ufw_deny
 
 import (
+	"loopvector_server_management/cmd/cmd_action"
 	"loopvector_server_management/cmd/cmd_action/cmd_action_ufw"
 	"loopvector_server_management/cmd/cmd_action/cmd_action_ufw/helper"
 	"loopvector_server_management/controller"
@@ -25,6 +26,8 @@ to quickly create a Cobra application.`,
 		return helper.RunUfwTrafficPolicyCommandE(
 			cmd,
 			args,
+			cmd_action.GetServerName(),
+			cmd_action.GetServerSshConnectionInfo(),
 			controller.UfwTrafficPolicy{Policy: controller.UfwTrafficPolicyDeny},
 		)
 	},

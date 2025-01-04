@@ -6,8 +6,6 @@ package cmd_action_ping
 import (
 	"loopvector_server_management/cmd/cmd_action"
 	"loopvector_server_management/controller"
-	"loopvector_server_management/controller/helper"
-	"loopvector_server_management/model"
 
 	"github.com/spf13/cobra"
 )
@@ -32,10 +30,9 @@ to quickly create a Cobra application.`,
 	// 	return nil
 	// },
 	RunE: func(cmd *cobra.Command, args []string) error {
-		controller.RunAnsibleTasks(
-			model.ServerNameModel{Name: cmd_action.ServerName},
-			[]model.AnsibleTask{{FullPath: helper.KFullPathTaskPing}},
-			nil,
+		controller.PingServer(
+			cmd_action.GetServerName(),
+			cmd_action.GetServerSshConnectionInfo(),
 		)
 		return nil
 	},

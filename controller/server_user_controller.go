@@ -56,16 +56,57 @@ func _buildAddUsersToGroupsRequestMap(requests []AddUsersToServerRequest) map[st
 	}
 }
 
-func AddUsersToServer(serverName model.ServerNameModel, users []AddUsersToServerRequest) error {
+func AddUsersToServer(
+	serverName model.ServerNameModel,
+	serverSshConnectionInfo model.ServerSshConnectionInfo,
+	users []AddUsersToServerRequest,
+) error {
 
 	userVars := _buildAddUsersToServerRequestMap(users)
 
 	if userVars != nil {
-		_, err := RunSimpleAnsibleTasks(
+
+		callbacks := []RunAnsibleTaskCallback{}
+
+		serverId, err := serverName.GetServerIdUsingServerName()
+		if err != nil {
+			panic(err)
+		}
+
+		for _, user := range users {
+			callbacks = append(
+				callbacks,
+				RunAnsibleTaskCallback{
+					TaskName: "create user " + user.Username + " if it does not exist",
+					OnChanged: func() {
+						model.ServerUser{
+							ServerID: serverId,
+							Username: user.Username,
+							Password: user.Password,
+						}.CreateNewIfItDoesNotExist()
+					},
+					OnUnchanged: func() {
+						model.ServerUser{
+							ServerID: serverId,
+							Username: user.Username,
+							Password: user.Password,
+						}.CreateNewIfItDoesNotExist()
+					},
+					OnFailed: func() {
+						// println("Failed to install ", app, " on ", args[0])
+					},
+				},
+			)
+		}
+
+		_, err = RunAnsibleTasks(
 			serverName,
-			helper.KFullPathTaskAddUsers,
-			userVars,
-			nil,
+			serverSshConnectionInfo,
+			[]model.AnsibleTask{{
+				FullPath: helper.KFullPathTaskAddUsers,
+				Vars:     userVars,
+			}},
+			callbacks,
 		)
 
 		if err != nil {
@@ -78,6 +119,7 @@ func AddUsersToServer(serverName model.ServerNameModel, users []AddUsersToServer
 	if userToGroupsVars != nil {
 		_, err := RunSimpleAnsibleTasks(
 			serverName,
+			serverSshConnectionInfo,
 			helper.KFullPathTaskAddUsersToGroups,
 			userToGroupsVars,
 			nil,
