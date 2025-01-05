@@ -4,6 +4,7 @@ Copyright © 2024 Agilan Anandan (agilan@loopvector.com)
 package main
 
 import (
+	"log"
 	"loopvector_server_management/cmd"
 	"loopvector_server_management/model"
 
@@ -44,11 +45,18 @@ import (
 	_ "loopvector_server_management/cmd/cmd_list/cmd_list_server"
 	_ "loopvector_server_management/cmd/create"
 	_ "loopvector_server_management/cmd/create/server"
-	_ "loopvector_server_management/cmd/migrate"
-	_ "loopvector_server_management/cmd/migrate/database"
+	_ "loopvector_server_management/cmd/database"
+	_ "loopvector_server_management/cmd/database/migrate"
+
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Println("No .env file found. Proceeding with environment variables.")
+	}
+
 	model.InitializeDB(false)
 	cmd.Execute()
 }

@@ -4,15 +4,11 @@ Copyright © 2024 Agilan Anandan <agilan@loopvector.com>
 package migrate
 
 import (
-	"fmt"
-	"loopvector_server_management/cmd"
+	"loopvector_server_management/cmd/database"
+	"loopvector_server_management/model"
 
 	"github.com/spf13/cobra"
 )
-
-func GetMigrateCmd() *cobra.Command {
-	return migrateCmd
-}
 
 // migrateCmd represents the migrate command
 var migrateCmd = &cobra.Command{
@@ -25,12 +21,12 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("migrate called")
+		model.InitializeDB(true)
 	},
 }
 
 func init() {
-	cmd.GetRootCmd().AddCommand(migrateCmd)
+	database.GetDatabaseCmd().AddCommand(migrateCmd)
 
 	// Here you will define your flags and configuration settings.
 

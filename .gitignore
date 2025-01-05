@@ -1,0 +1,58 @@
+# Binaries for programs and plugins
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Build and output directories
+bin/
+build/
+dist/
+
+# Test binary
+*.test
+
+# Dependency directories (if using vendoring)
+vendor/
+
+# Go module files
+go.sum
+go.work
+go.work.sum
+
+# IDE and editor specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+*.swn
+*.un~
+*.bak
+
+# Logs and temporary files
+*.log
+*.tmp
+*.out
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
+.env.*
+.envrc
+
+# ssh keys
+.ssh
+.ssh.*
+
+# Go Coverage tool files
+coverage.out
+*.coverprofile
+
+# Docker-related files
+docker-compose.override.yml
+
+# Ansible-related files
+ansible.log
