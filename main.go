@@ -49,6 +49,7 @@ import (
 	_ "loopvector_server_management/cmd/database/migrate"
 
 	"github.com/joho/godotenv"
+	"github.com/spf13/viper"
 )
 
 func main() {
@@ -56,6 +57,8 @@ func main() {
 	if err != nil {
 		log.Println("No .env file found. Proceeding with environment variables.")
 	}
+
+	viper.AutomaticEnv()
 
 	model.InitializeDB(false)
 	cmd.Execute()

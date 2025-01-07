@@ -1,0 +1,38 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app
+    environment:
+      DATABASE_IP_ADDRESS: db
+      DATABASE_PORT: 3306
+      DATABASE_USERNAME: ${MYSQL_DATABASE_USERNAME}
+      DATABASE_PASSWORD: ${MYSQL_DATABASE_PASSWORD}
+      DATABASE_NAME: ${MYSQL_DATABASE_NAME}
+    ports:
+      - "127.0.0.1:${LSM_APP_PORT}:8080" # Map app port for testing
+    depends_on:
+      - db
+    stdin_open: true # Keep the container's stdin open
+    tty: true # Allocate a pseudo-TTY
+    restart: unless-stopped
+    command: tail -f /dev/null # Keep the container running
+
+  db:
+    image: mysql:9.1.0
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_DATABASE_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE_NAME}
+      MYSQL_USER: ${MYSQL_DATABASE_USERNAME}
+      MYSQL_PASSWORD: ${MYSQL_DATABASE_PASSWORD}
+    ports:
+      - "127.0.0.1:${MYSQL_DATABASE_PORT}:3306"
+    volumes:
+      - lsm_mysql_data:/var/lib/mysql
+    restart: unless-stopped
+
+volumes:
+  lsm_mysql_data:
+    name: lsm_mysql_data
