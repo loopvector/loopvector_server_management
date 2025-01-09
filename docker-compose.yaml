@@ -1,11 +1,6 @@
 services:
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile.dev
-    volumes:
-      - .:/app
-      - ${SSH_PUB_KEY_FOLDER}:/app/.ssh:ro
+    image: your-app-image:latest
     environment:
       DATABASE_IP_ADDRESS: db
       DATABASE_PORT: 3306
@@ -35,5 +30,5 @@ services:
     restart: unless-stopped
 
 volumes:
-  lsm_mysql_data:
-    name: lsm_mysql_data
+  lsm_mysql_data_production:
+    name: lsm_mysql_data_production

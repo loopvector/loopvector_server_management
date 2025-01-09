@@ -15,8 +15,9 @@ import (
 )
 
 var (
-	serverName string
-	username   string
+	serverName   string
+	username     string
+	userPassword string
 	// usernames  []string
 	ipv4 string
 	ipv6 string
@@ -45,15 +46,17 @@ func GetServerSshConnectionInfo() model.ServerSshConnectionInfo {
 		}
 	}
 	var currentServerIpv6 model.ServerIpv6
-	if ipv6 != "" {
-		currentServerIpv6, err = model.ServerIpv6{Ip: ipv6}.GetServerIpv6UsingIpAddress()
-		if err != nil {
-			println("Error getting ipv6: ", err.Error())
-		}
-	} else {
-		currentServerIpv6, err = currentServerName.GetIpv6UsingServerName()
-		if err != nil {
-			println("Error getting ipv6: ", err.Error())
+	if currentServerIpv4 == (model.ServerIpv4{}) {
+		if ipv6 != "" {
+			currentServerIpv6, err = model.ServerIpv6{Ip: ipv6}.GetServerIpv6UsingIpAddress()
+			if err != nil {
+				println("Error getting ipv6: ", err.Error())
+			}
+		} else {
+			currentServerIpv6, err = currentServerName.GetIpv6UsingServerName()
+			if err != nil {
+				println("Error getting ipv6: ", err.Error())
+			}
 		}
 	}
 	if currentServerIpv4 == (model.ServerIpv4{}) &&
@@ -70,32 +73,37 @@ func GetServerSshConnectionInfo() model.ServerSshConnectionInfo {
 
 	currentServerSshPort := port
 
-	var currentServerUser model.ServerUser
-	var currentServerRootUser model.ServerRootUser
-	if username == helper.KRootUserUsername {
-		currentServerRootUser, err = currentServerName.GetRootUserUsingServerName()
-		if err != nil {
-			println("Error getting username: ", err.Error())
-		}
-	} else {
-		currentServerUser, err = currentServerName.GetServerUserUsingServerName(username)
-		if err != nil {
-			println("Error getting username: ", err.Error())
-		}
-	}
-	if currentServerUser == (model.ServerUser{}) &&
-		currentServerRootUser == (model.ServerRootUser{}) {
-		panic(errors.New("neither username or root user is set"))
-	}
-
 	currentServerSshUsername := ""
 	currentServerSshUserPassword := ""
-	if currentServerUser != (model.ServerUser{}) {
-		currentServerSshUsername = currentServerUser.Username
-		currentServerSshUserPassword = currentServerUser.Password
+	if username != "" && userPassword != "" {
+		currentServerSshUsername = username
+		currentServerSshUserPassword = userPassword
 	} else {
-		currentServerSshUsername = helper.KRootUserUsername
-		currentServerSshUserPassword = currentServerRootUser.Password
+		var currentServerUser model.ServerUser
+		var currentServerRootUser model.ServerRootUser
+		if username == helper.KRootUserUsername {
+			currentServerRootUser, err = currentServerName.GetRootUserUsingServerName()
+			if err != nil {
+				println("Error getting username: ", err.Error())
+			}
+		} else {
+			currentServerUser, err = currentServerName.GetServerUserUsingServerName(username)
+			if err != nil {
+				println("Error getting username: ", err.Error())
+			}
+		}
+		if currentServerUser == (model.ServerUser{}) &&
+			currentServerRootUser == (model.ServerRootUser{}) {
+			panic(errors.New("neither username or root user is set"))
+		}
+
+		if currentServerUser != (model.ServerUser{}) {
+			currentServerSshUsername = currentServerUser.Username
+			currentServerSshUserPassword = currentServerUser.Password
+		} else {
+			currentServerSshUsername = helper.KRootUserUsername
+			currentServerSshUserPassword = currentServerRootUser.Password
+		}
 	}
 
 	currentServerSshPvtKeyFullFilePath := ""
@@ -191,6 +199,7 @@ func init() {
 	actionCmd.MarkPersistentFlagRequired("serverName")
 
 	actionCmd.PersistentFlags().StringVar(&username, "sshUsername", helper.KRootUserUsername, "username that can be used to ssh into the server")
+	actionCmd.PersistentFlags().StringVar(&userPassword, "sshUserPassword", "", "ssh password for the provided username flag")
 	// actionCmd.PersistentFlags().StringSliceVar(&usernames, "usernames", []string{}, "usernames that can be used to ssh into the server")
 
 	// actionCmd.MarkFlagsMutuallyExclusive("username", "usernames")
