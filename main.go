@@ -45,6 +45,7 @@ import (
 	_ "loopvector_server_management/cmd/cmd_list/cmd_list_server"
 	_ "loopvector_server_management/cmd/create"
 	_ "loopvector_server_management/cmd/create/server"
+	_ "loopvector_server_management/cmd/create/user"
 	_ "loopvector_server_management/cmd/database"
 	_ "loopvector_server_management/cmd/database/migrate"
 
