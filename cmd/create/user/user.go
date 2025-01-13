@@ -1,12 +1,13 @@
 /*
 Copyright © 2025 Agilan Anandan <agilan@loopvector.com>
 */
-package cmd
+package user
 
 import (
 	"loopvector_server_management/cmd/create"
 	"loopvector_server_management/controller"
 	"loopvector_server_management/controller/helper"
+	"strings"
 
 	"github.com/spf13/cobra"
 )
@@ -28,8 +29,15 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		hashedPassword := helper.HashPassword(password)
-		controller.RegisterUser(username, email, hashedPassword)
+		hashedPassword, err := helper.Encrypt(password)
+		if err != nil {
+			panic(err)
+		}
+		var un *string = nil
+		if strings.TrimSpace(username) != "" {
+			un = &username
+		}
+		controller.RegisterUser(un, email, hashedPassword, false)
 	},
 }
 

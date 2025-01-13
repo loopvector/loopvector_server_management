@@ -1,10 +1,12 @@
 package controller
 
 import (
+	"errors"
 	"fmt"
 	"loopvector_server_management/model"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 func CreateNewUserSession(user model.User) error {
@@ -24,6 +26,30 @@ func LoadCurrentUserSessionToken() (string, error) {
 		return "", nil
 	}
 	return token, nil
+}
+
+func ValidateSession() (model.User, error) {
+	token := loadSession()
+	if token == "" {
+		return model.User{}, errors.New("no active session found")
+	}
+
+	userSession, err := model.UserSession{
+		Token: token,
+	}.GetUsingToken()
+	if err != nil {
+		return model.User{}, err
+	}
+	if time.Now().After(userSession.ExpiresAt) {
+		return model.User{}, errors.New("session expired or invalid")
+	}
+
+	user, err := userSession.GetUserUsingId()
+	if err != nil {
+		return model.User{}, err
+	}
+
+	return user, nil
 }
 
 func saveSession(token string) {

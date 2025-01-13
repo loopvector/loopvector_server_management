@@ -4,11 +4,21 @@ Copyright © 2025 Agilan Anandan <agilan@loopvector.com>
 package user
 
 import (
-	"fmt"
+	"log"
 	"loopvector_server_management/cmd"
+	"loopvector_server_management/controller"
+	"loopvector_server_management/model"
 
 	"github.com/spf13/cobra"
 )
+
+var (
+	loggedInUser model.User
+)
+
+func GetLoggedInUser() model.User {
+	return loggedInUser
+}
 
 func GetUserCmd() *cobra.Command {
 	return userCmd
@@ -24,8 +34,14 @@ and usage of using your command. For example:
 Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("user called")
+	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		log.Println("Validating session. user command")
+		var err error
+		loggedInUser, err = controller.ValidateSession()
+		if err != nil {
+			log.Println(err.Error())
+		}
+		return nil
 	},
 }
 

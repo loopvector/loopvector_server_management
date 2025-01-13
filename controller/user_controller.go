@@ -8,12 +8,44 @@ import (
 	"time"
 )
 
-func RegisterUser(username, email, hashedPassword string) error {
-	return model.User{
+// func GenerateRandomBytes(n int) ([]byte, error) {
+// 	b := make([]byte, n)
+// 	_, err := rand.Read(b)
+// 	// Note that err == nil only if we read len(b) bytes.
+// 	if err != nil {
+// 		return nil, stacktrace.Propagate(err, "")
+// 	}
+
+// 	return b, nil
+// }
+
+// func GetHashedPassword(password string) (string, error) {
+// 	saltedBytes := []byte(password)
+// 	hashedBytes, err := bcrypt.GenerateFromPassword(saltedBytes, bcrypt.DefaultCost)
+// 	if err != nil {
+// 		return "", err
+// 	}
+
+// 	hash := string(hashedBytes[:])
+// 	return hash, nil
+// }
+
+func RegisterUser(
+	username *string,
+	email, hashedPassword string,
+	isAdmin bool,
+) error {
+	err := model.User{
 		Username: username,
 		Email:    email,
 		Password: hashedPassword,
+		IsAdmin:  isAdmin,
 	}.CreateNew()
+
+	if err != nil {
+		panic(err)
+	}
+	return nil
 }
 
 func LoginUser(email, password string) error {
@@ -23,10 +55,7 @@ func LoginUser(email, password string) error {
 	if err != nil {
 		panic(err)
 	}
-	verified, err := helper.VerifyPassword(password, user.Password)
-	if err != nil {
-		panic(err)
-	}
+	verified := helper.VerifyPassword(password, user.Password)
 	if !verified { // Implement password verification
 		panic("Invalid password")
 	}
@@ -84,7 +113,10 @@ func ResetPassword(token, newPassword string) error {
 		panic(err)
 	}
 
-	hashedPassword := helper.HashPassword(newPassword)
+	hashedPassword, err := helper.Encrypt(newPassword)
+	if err != nil {
+		panic(err)
+	}
 	user.Password = hashedPassword
 
 	err = user.UpdatePassword()
@@ -101,25 +133,27 @@ func ResetPassword(token, newPassword string) error {
 }
 
 func sendPasswordResetEmail(email, token string) {
-	// db := getDB()
-	var settings model.SmtpSetting
-	settings, err := model.GetFirstSmtpSetting()
+	adminSetting, err := model.LoadAdminSetting()
 	if err != nil {
 		panic(err)
 	}
 
-	smtpAddress := fmt.Sprintf("%s:%d", settings.SMTPHost, settings.SMTPPort)
-	auth := smtp.PlainAuth("", settings.SMTPUser, settings.SMTPPassword, settings.SMTPHost)
+	if adminSetting.SMTPHost != "" && adminSetting.SMTPUser != "" {
+		smtpAddress := fmt.Sprintf("%s:%d", adminSetting.SMTPHost, adminSetting.SMTPPort)
+		auth := smtp.PlainAuth("", adminSetting.SMTPUser, adminSetting.SMTPPassword, adminSetting.SMTPHost)
 
-	message := []byte(fmt.Sprintf(
-		"Subject: Password Reset\n\nClick the link to reset your password: https://example.com/reset-password?token=%s\n",
-		token,
-	))
+		message := []byte(fmt.Sprintf(
+			"Subject: Password Reset\n\nClick the link to reset your password: https://example.com/reset-password?token=%s\n",
+			token,
+		))
 
-	err = smtp.SendMail(smtpAddress, auth, settings.SMTPUser, []string{email}, message)
-	if err != nil {
-		panic("Failed to send email: " + err.Error())
+		err = smtp.SendMail(smtpAddress, auth, adminSetting.SMTPUser, []string{email}, message)
+		if err != nil {
+			panic("Failed to send email: " + err.Error())
+		}
+
+		fmt.Println("Password reset email sent")
+	} else {
+		fmt.Println("Password reset email not sent. Incomplete SMTP admin settings")
 	}
-
-	fmt.Println("Password reset email sent")
 }

@@ -5,13 +5,25 @@ package cmd
 
 import (
 	"fmt"
+	"log"
+	"loopvector_server_management/controller"
+	"loopvector_server_management/model"
 	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
+var LoggedInUser model.User
+
 var cfgFile string
+
+func GetLoggedInUser() *model.User {
+	if LoggedInUser == (model.User{}) {
+		return nil
+	}
+	return &LoggedInUser
+}
 
 func GetRootCmd() *cobra.Command {
 	return rootCmd
@@ -27,6 +39,15 @@ examples and usage of using your application. For example:
 Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
+	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		log.Println("Validating session. root command")
+		LoggedInUser, err := controller.ValidateSession()
+		if err != nil {
+			panic("Unauthorized: " + err.Error())
+		}
+		fmt.Printf("Hello, %s! You are authorized.\n", LoggedInUser.Email)
+		return nil
+	},
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },

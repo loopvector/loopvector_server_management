@@ -6,7 +6,9 @@ package main
 import (
 	"log"
 	"loopvector_server_management/cmd"
+	"loopvector_server_management/helper"
 	"loopvector_server_management/model"
+	"strings"
 
 	_ "loopvector_server_management/cmd/cmd_action"
 	_ "loopvector_server_management/cmd/cmd_action/cmd_action_group"
@@ -48,6 +50,9 @@ import (
 	_ "loopvector_server_management/cmd/create/user"
 	_ "loopvector_server_management/cmd/database"
 	_ "loopvector_server_management/cmd/database/migrate"
+	_ "loopvector_server_management/cmd/user"
+	_ "loopvector_server_management/cmd/user/login"
+	_ "loopvector_server_management/cmd/user/logout"
 
 	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
@@ -63,4 +68,13 @@ func main() {
 
 	model.InitializeDB(false)
 	cmd.Execute()
+
+	model.GenerateAdminSetting(model.AdminConfig{
+		SMTPHost:                      viper.GetString(helper.KSmtpHost),
+		SMTPPort:                      viper.GetUint16(helper.KSmtpPort),
+		SMTPUser:                      viper.GetString(helper.KSmtpUser),
+		SMTPPassword:                  viper.GetString(helper.KSmtpPassword),
+		SignupDomainWhitelist:         strings.Split(viper.GetString(helper.KSignUpDomainWhitelist), ","),
+		UserEmailVerificationRequired: viper.GetBool(helper.KUserEmailVerificationRequired),
+	})
 }

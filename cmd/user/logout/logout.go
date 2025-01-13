@@ -1,7 +1,7 @@
 /*
 Copyright © 2025 Agilan Anandan <agilan@loopvector.com>
 */
-package login
+package logout
 
 import (
 	"log"
@@ -13,13 +13,12 @@ import (
 )
 
 var (
-	email    string
-	password string
+	email string
 )
 
-// loginCmd represents the login command
-var loginCmd = &cobra.Command{
-	Use:   "login",
+// logoutCmd represents the logout command
+var logoutCmd = &cobra.Command{
+	Use:   "logout",
 	Short: "A brief description of your command",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
@@ -29,18 +28,17 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if user.GetLoggedInUser() == (model.User{}) {
-			controller.LoginUser(email, password)
+			log.Fatal("you are not logged in")
 		} else if user.GetLoggedInUser().Email == email {
-			log.Println("User already logged in")
-		} else if user.GetLoggedInUser().Email != email {
-			log.Println("Another user already logged in")
+			controller.LogoutUser()
+		} else {
+			log.Fatal("you are not logged in as this user")
 		}
 	},
 }
 
 func init() {
-	user.GetUserCmd().AddCommand(loginCmd)
+	user.GetUserCmd().AddCommand(logoutCmd)
 
-	loginCmd.Flags().StringVar(&email, "email", "", "email of the user of this app")
-	loginCmd.Flags().StringVar(&password, "password", "", "password of the user of this app")
+	logoutCmd.Flags().StringVar(&email, "email", "", "email of the user of this app")
 }

@@ -36,3 +36,11 @@ func (us UserSession) DeleteUserSession() error {
 	}
 	return nil
 }
+
+func (us UserSession) GetUsingToken() (UserSession, error) {
+	var session UserSession
+	if err := GetDB().Where(&UserSession{Token: us.Token}).First(&session).Error; err != nil {
+		return UserSession{}, err
+	}
+	return session, nil
+}
