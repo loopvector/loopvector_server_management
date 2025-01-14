@@ -63,3 +63,6 @@ playbook.yaml
 
 # json
 *.json
+
+# jar
+*.jar
