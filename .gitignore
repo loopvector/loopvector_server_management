@@ -67,5 +67,5 @@ playbook.yaml
 # jar
 *.jar
 
-# text file
+# text
 *.txt
