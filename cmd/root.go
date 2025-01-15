@@ -29,6 +29,16 @@ func GetRootCmd() *cobra.Command {
 	return rootCmd
 }
 
+func ValidateLogin() error {
+	log.Println("Validating session. root command")
+	LoggedInUser, err := controller.ValidateSession()
+	if err != nil {
+		panic("Unauthorized: " + err.Error())
+	}
+	fmt.Printf("Hello, %s! You are authorized.\n", LoggedInUser.Email)
+	return nil
+}
+
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "lsm",
@@ -40,13 +50,7 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-		log.Println("Validating session. root command")
-		LoggedInUser, err := controller.ValidateSession()
-		if err != nil {
-			panic("Unauthorized: " + err.Error())
-		}
-		fmt.Printf("Hello, %s! You are authorized.\n", LoggedInUser.Email)
-		return nil
+		return ValidateLogin()
 	},
 	// Uncomment the following line if your bare application
 	// has an action associated with it:

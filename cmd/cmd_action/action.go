@@ -142,18 +142,23 @@ to quickly create a Cobra application.`,
 	// 	return suggestions, cobra.ShellCompDirectiveNoFileComp
 	// },
 	//ValidArgs: controller.GetAllActiveServerNamesWithoutError(),
-	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+	PersistentPreRunE: func(c *cobra.Command, args []string) error {
 		// println("root action persistentprerune called")
-		// Validate the server name
-		if serverName == "" {
-			println("a server name is required")
-			return fmt.Errorf("a server name is required")
+		err := cmd.ValidateLogin()
+		if err != nil {
+			// Validate the server name
+			if serverName == "" {
+				println("a server name is required")
+				return fmt.Errorf("a server name is required")
+			}
+			if !_isValidServerName(serverName) {
+				println("invalid server name: %s", serverName)
+				return fmt.Errorf("invalid server name: %s", serverName)
+			}
+			return nil
+		} else {
+			return err
 		}
-		if !_isValidServerName(serverName) {
-			println("invalid server name: %s", serverName)
-			return fmt.Errorf("invalid server name: %s", serverName)
-		}
-		return nil
 	},
 	// Args: func(cmd *cobra.Command, args []string) error {
 	// 	// Ensure the first argument is a valid server name

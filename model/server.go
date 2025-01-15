@@ -13,7 +13,7 @@ type ServerNameModel struct {
 type Server struct {
 	ID                    uint64            `gorm:"primaryKey;autoIncrement"`
 	ServerName            string            `gorm:"unique;not null"`
-	DisplayName           string            `gorm:"not null"`
+	DisplayName           string            `gorm:"unique;not null"`
 	ServerActiveStateName string            `gorm:"type:VARCHAR(255);not null"`
 	ServerActiveState     ServerActiveState `gorm:"not null;references:Name;constraint:OnUpdate:CASCADE,OnDelete:NO ACTION;"`
 }

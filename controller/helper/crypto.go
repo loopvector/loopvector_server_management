@@ -7,7 +7,6 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io"
-	"log"
 	"loopvector_server_management/helper"
 
 	"github.com/spf13/viper"
@@ -50,7 +49,7 @@ func Decrypt(cipherTextBase64 string) (string, error) {
 	if len(key) != 32 {
 		return "", fmt.Errorf("master key must be 32 bytes long")
 	}
-	log.Println("cipherTextBase64: ", cipherTextBase64)
+	// log.Println("cipherTextBase64: ", cipherTextBase64)
 	cipherText, err := base64.StdEncoding.DecodeString(cipherTextBase64)
 	if err != nil {
 		return "", fmt.Errorf("failed to decode base64 ciphertext: %w", err)
