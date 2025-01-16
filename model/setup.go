@@ -37,6 +37,7 @@ func _connectToDatabase() {
 
 func InitializeDB(shouldMigrate bool) {
 	if shouldMigrate {
+		AppFirstLaunch{}.Initialize()
 		ServerActiveState{}.Initialize()
 		Server{}.Initialize()
 		ServerIpActiveState{}.Initialize()
@@ -51,5 +52,7 @@ func InitializeDB(shouldMigrate bool) {
 		User{}.Initialize()
 		UserSession{}.Initialize()
 		PasswordResetToken{}.Initialize()
+
+		AppFirstLaunch{}.UpdateAppFirstLaunch()
 	}
 }

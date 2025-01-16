@@ -66,7 +66,8 @@ func main() {
 
 	viper.AutomaticEnv()
 
-	model.InitializeDB(false)
+	shouldInitializeDb := model.AppFirstLaunch{}.CheckFirstLaunch()
+	model.InitializeDB(shouldInitializeDb)
 	cmd.Execute()
 
 	model.GenerateAdminSetting(model.AdminConfig{

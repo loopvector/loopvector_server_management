@@ -38,7 +38,7 @@ services:
     ports:
       - "127.0.0.1:${MYSQL_DATABASE_PORT}:3306"
     volumes:
-      - lsm_mysql_data:/var/lib/mysql
+      - lsm_mysql_data_development:/var/lib/mysql
     restart: unless-stopped
 
 volumes:
