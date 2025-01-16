@@ -1,12 +1,21 @@
 services:
   app:
-    image: your-app-image:latest
+    image: loopvector/server/lsm:v0.0.1
+    volumes:
+      - ${SSH_PUB_KEY_FOLDER}:/app/.ssh:ro
     environment:
       DATABASE_IP_ADDRESS: db
       DATABASE_PORT: 3306
       DATABASE_USERNAME: ${MYSQL_DATABASE_USERNAME}
       DATABASE_PASSWORD: ${MYSQL_DATABASE_PASSWORD}
       DATABASE_NAME: ${MYSQL_DATABASE_NAME}
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+      SIGNUP_DOMAIN_WHITELIST: ${SIGNUP_DOMAIN_WHITELIST}
+      USER_EMAIL_VERIFICATION_REQUIRED: ${USER_EMAIL_VERIFICATION_REQUIRED}
+      MASTER_KEY: ${MASTER_KEY}
     ports:
       - "127.0.0.1:${LSM_APP_PORT}:8080" # Map app port for testing
     depends_on:
@@ -14,7 +23,6 @@ services:
     stdin_open: true # Keep the container's stdin open
     tty: true # Allocate a pseudo-TTY
     restart: unless-stopped
-    command: tail -f /dev/null # Keep the container running
 
   db:
     image: mysql:9.1.0
@@ -30,5 +38,5 @@ services:
     restart: unless-stopped
 
 volumes:
-  lsm_mysql_data_production:
-    name: lsm_mysql_data_production
+  lsm_mysql_data:
+    name: lsm_mysql_data
