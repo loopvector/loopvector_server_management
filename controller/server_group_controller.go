@@ -23,7 +23,7 @@ func AddGroupsToServer(
 
 	for _, group := range groupNames {
 		callbacks = append(callbacks, RunAnsibleTaskCallback{
-			TaskName: "create group " + group,
+			TaskNames: []string{"create group " + group},
 			OnChanged: func() {
 				// println("Added group ", group, " to ", serverName.Name)
 				model.ServerIDModel{ID: serverId}.AddGroup(model.ServerGroup{ServerID: serverId, Name: group})

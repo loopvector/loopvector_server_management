@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"math/big"
+	"strconv"
 	"time"
 )
 
@@ -89,4 +90,16 @@ func GenerateToken() string {
 		panic(err)
 	}
 	return hex.EncodeToString(bytes)
+}
+
+func GetCurrentTimestampMillis() (int64, string) {
+	int64Value := time.Now().UnixMilli()
+	stringValue := strconv.FormatInt(int64Value, 10)
+	return int64Value, stringValue
+}
+
+func GetCurrentTimestampNano() (int64, string) {
+	int64Value := time.Now().UnixNano()
+	stringValue := strconv.FormatInt(int64Value, 10)
+	return int64Value, stringValue
 }

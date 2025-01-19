@@ -4,10 +4,11 @@ Copyright © 2024 Agilan Anandan <agilan@loopvector.com>
 package cmd_action_ssh_pub_key
 
 import (
-	"errors"
 	"fmt"
 	"loopvector_server_management/cmd/cmd_action"
 	"loopvector_server_management/controller"
+	"loopvector_server_management/controller/helper"
+	"loopvector_server_management/model"
 	"path/filepath"
 
 	"github.com/spf13/cobra"
@@ -16,10 +17,10 @@ import (
 // const sshPubKeyFileFullPath = ".ssh/authorized_keys"
 
 var (
-	key                   string
-	keys                  []string
-	filePermissionMode    = "0600"
-	fileDirPermissionMode = "0700"
+	filePermissionMode           = "0600"
+	fileDirPermissionMode        = "0700"
+	homeDirectory                = "/home"
+	authorizedKeysFilePathSuffix = ".ssh/authorized_keys"
 )
 
 func GetActionSshPubKeyCmd() *cobra.Command {
@@ -41,18 +42,65 @@ to quickly create a Cobra application.`,
 	},
 }
 
-func AddSshKeys(cmd *cobra.Command) error {
+func ViewKeys() error {
+	username := cmd_action.GetUsername()
+	userRootDirectory := filepath.Join(homeDirectory, username)
+	userAuthorizedKeysFilePath := filepath.Join(userRootDirectory, authorizedKeysFilePathSuffix)
+	controller.ReadBlocksFromFile(
+		cmd_action.GetServerName(),
+		cmd_action.GetServerSshConnectionInfo(),
+		controller.ReadBlocksFromFileRequest{
+			FileFullPath:     userAuthorizedKeysFilePath,
+			AsSudo:           true,
+			CommentDelimiter: helper.KCommentDelimiterHash,
+		})
+	return nil
+}
+
+func DeleteKey(identifier string) error {
+	username := cmd_action.GetUsername()
+	userRootDirectory := filepath.Join(homeDirectory, username)
+	userAuthorizedKeysFilePath := filepath.Join(userRootDirectory, authorizedKeysFilePathSuffix)
+	serverId, err := cmd_action.GetServerName().GetServerIdUsingServerName()
+	if err != nil {
+		panic(err)
+	}
+	serverUser, err := model.ServerUser{
+		ServerID: serverId,
+		Username: username,
+	}.GetUsingServerIdAndUsername()
+	if err != nil {
+		panic(err)
+	}
+	callbacks := []controller.RunAnsibleTaskCallback{{
+		TaskNames: []string{"delete line block from a file with block_timestamp: " + identifier},
+		OnChanged: func() {
+			model.AuthorizationKey{
+				ServerUserID: serverUser.ID,
+				ServerID:     serverId,
+				Identifier:   identifier,
+			}.DeleteUsingIdentifierUserIdAndServerId()
+		},
+		OnUnchanged: func() {},
+		OnFailed:    func() {},
+	}}
+	controller.DeleteBlockFromFile(
+		cmd_action.GetServerName(),
+		cmd_action.GetServerSshConnectionInfo(),
+		controller.DeleteBlockFromFileRequest{
+			FileFullPath:     userAuthorizedKeysFilePath,
+			AsSudo:           true,
+			CommentDelimiter: helper.KCommentDelimiterHash,
+			BlockTimestamp:   identifier,
+		}, callbacks)
+	return nil
+}
+
+func AddSshKeys(keys []string) error {
 	username := cmd_action.GetUsername()
 	// if len(allUsernames) == 0 {
 	// 	return errors.New("no username(s) provided")
 	// }
-
-	if key == "" && len(keys) == 0 {
-		return errors.New("no key(s) provided")
-	}
-
-	homeDirectory := "/home"
-	authorizedKeysFilePathSuffix := ".ssh/authorized_keys"
 
 	// pathsToAddPubKeys := []string{}
 	// for _, u := range allUsernames {
@@ -61,20 +109,38 @@ func AddSshKeys(cmd *cobra.Command) error {
 	// 	pathsToAddPubKeys = append(pathsToAddPubKeys, userAuthorizedKeysFilePath)
 	// }
 
-	allKeys := []string{}
-	if len(keys) > 0 {
-		allKeys = append(allKeys, keys...)
-	} else {
-		allKeys = append(allKeys, key)
+	serverId, err := cmd_action.GetServerName().GetServerIdUsingServerName()
+	if err != nil {
+		panic(err)
 	}
-
+	serverUser, err := model.ServerUser{
+		ServerID: serverId,
+		Username: username,
+	}.GetUsingServerIdAndUsername()
+	if err != nil {
+		panic(err)
+	}
 	// for _, u := range allUsernames {
 	userRootDirectory := filepath.Join(homeDirectory, username)
 	userAuthorizedKeysFilePath := filepath.Join(userRootDirectory, authorizedKeysFilePathSuffix)
 	//pathsToAddPubKeys = append(pathsToAddPubKeys, userAuthorizedKeysFilePath)
 	// lines := []controller.LineToFileAddRequest{}
-	for _, key := range allKeys {
+	for _, key := range keys {
 		oneLine := controller.LineToFileAddRequest{Line: key}
+		_, blockTimestamp := helper.GetCurrentTimestampMillis()
+		callbacks := []controller.RunAnsibleTaskCallback{{
+			TaskNames: []string{"add line block to a file", "add line block to a file and set permissions"},
+			OnChanged: func() {
+				model.AuthorizationKey{
+					ServerUserID: serverUser.ID,
+					ServerID:     serverId,
+					PublicKey:    key,
+					Identifier:   blockTimestamp,
+				}.Create()
+			},
+			OnUnchanged: func() {},
+			OnFailed:    func() {},
+		}}
 		controller.AddLineBlockToFile(
 			cmd_action.GetServerName(),
 			cmd_action.GetServerSshConnectionInfo(),
@@ -85,8 +151,11 @@ func AddSshKeys(cmd *cobra.Command) error {
 				FileOwnerUsername: username,
 				FileDirOwner:      username,
 				AsSudo:            true,
+				BlockTimestamp:    blockTimestamp,
+				CommentDelimiter:  helper.KCommentDelimiterHash,
 			},
 			[]controller.LineToFileAddRequest{oneLine},
+			callbacks,
 		)
 	}
 	return nil
@@ -94,13 +163,4 @@ func AddSshKeys(cmd *cobra.Command) error {
 
 func init() {
 	cmd_action.GetActionCmd().AddCommand(sshPubKeyCmd)
-
-	sshPubKeyCmd.PersistentFlags().StringVar(&key, "key", "", "pub key that can be used to ssh into the server")
-	sshPubKeyCmd.PersistentFlags().StringSliceVar(&keys, "keys", []string{}, "pub keys that can be used to ssh into the server")
-
-	sshPubKeyCmd.MarkFlagsOneRequired("key", "keys")
-	sshPubKeyCmd.MarkFlagsMutuallyExclusive("key", "keys")
-
-	// sshPubKeyCmd.MarkFlagsOneRequired("username", "usernames")
-	// sshPubKeyCmd.MarkFlagsMutuallyExclusive("username", "usernames")
 }

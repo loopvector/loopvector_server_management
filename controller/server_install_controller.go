@@ -25,7 +25,7 @@ func InstallServerApps(
 		callbacks = append(
 			callbacks,
 			RunAnsibleTaskCallback{
-				TaskName: "install package " + app,
+				TaskNames: []string{"install package " + app},
 				OnChanged: func() {
 					// println("Installed ", app, " on ", args[0])
 					model.ServerApp{

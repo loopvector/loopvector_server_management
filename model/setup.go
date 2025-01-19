@@ -52,6 +52,9 @@ func InitializeDB(shouldMigrate bool) {
 		User{}.Initialize()
 		UserSession{}.Initialize()
 		PasswordResetToken{}.Initialize()
+		AuthorizationKey{}.Initialize()
+		SshdConfig{}.Initialize()
+		Sudoer{}.Initialize()
 
 		AppFirstLaunch{}.UpdateAppFirstLaunch()
 	}

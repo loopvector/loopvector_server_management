@@ -72,9 +72,9 @@ type AnsiblePlaybookRunResult struct {
 				Name string `json:"name"`
 			} `json:"task"`
 			Hosts map[string]struct {
-				Changed bool    `json:"changed"`
-				Failed  *bool   `json:"failed,omitempty"`
-				Msg     *string `json:"msg,omitempty"`
+				Changed bool            `json:"changed"`
+				Failed  *bool           `json:"failed,omitempty"`
+				Msg     json.RawMessage `json:"msg,omitempty"`
 			} `json:"hosts"`
 		} `json:"tasks"`
 	} `json:"plays"`

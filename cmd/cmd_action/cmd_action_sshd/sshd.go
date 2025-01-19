@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"loopvector_server_management/cmd/cmd_action"
 	"loopvector_server_management/controller"
+	"loopvector_server_management/controller/helper"
 	"path/filepath"
 
 	"github.com/spf13/cobra"
@@ -16,9 +17,6 @@ const sshdConfigFileCreatePath = "/etc/ssh/sshd_config.d"
 
 var (
 	//port                        uint16
-	sshdConfigKey         string
-	sshdConfigValue       string
-	matchDirective        string
 	fileName              string
 	filePermissionMode    = "0755"
 	fileDirPermissionMode = "0755"
@@ -51,8 +49,37 @@ to quickly create a Cobra application.`,
 	},
 }
 
-func AddASshdConfig() {
+func DeleteASshdConfig(identifier string) {
 	fileFullPath := filepath.Join(sshdConfigFileCreatePath, fileName)
+	controller.DeleteASshdConfig(
+		cmd_action.GetServerName(),
+		cmd_action.GetServerSshConnectionInfo(),
+		controller.DeleteBlockFromFileRequest{
+			FileFullPath:     fileFullPath,
+			AsSudo:           true,
+			CommentDelimiter: helper.KCommentDelimiterHash,
+			BlockTimestamp:   identifier,
+		},
+		identifier,
+	)
+}
+
+func ViewSshdConfigs() {
+	fileFullPath := filepath.Join(sshdConfigFileCreatePath, fileName)
+	controller.ViewSshdConfigs(
+		cmd_action.GetServerName(),
+		cmd_action.GetServerSshConnectionInfo(),
+		controller.ReadBlocksFromFileRequest{
+			FileFullPath:     fileFullPath,
+			AsSudo:           true,
+			CommentDelimiter: helper.KCommentDelimiterHash,
+		},
+	)
+}
+
+func AddASshdConfig(sshdConfigKey, sshdConfigValue, matchDirective string) {
+	fileFullPath := filepath.Join(sshdConfigFileCreatePath, fileName)
+	_, blockTimestamp := helper.GetCurrentTimestampMillis()
 	controller.AddASshdConfig(
 		cmd_action.GetServerName(),
 		cmd_action.GetServerSshConnectionInfo(),
@@ -61,6 +88,8 @@ func AddASshdConfig() {
 			FilePermission:    filePermissionMode,
 			AsSudo:            true,
 			FileDirPermission: fileDirPermissionMode,
+			CommentDelimiter:  helper.KCommentDelimiterHash,
+			BlockTimestamp:    blockTimestamp,
 		},
 		controller.SSHDConfigAddRequest{
 			Key:            sshdConfigKey,
@@ -78,13 +107,5 @@ func init() {
 
 	sshdCmd.MarkPersistentFlagRequired("fileName")
 	//sshdCmd.MarkFlagRequired("filePermissionMode")
-
-	sshdCmd.PersistentFlags().StringVar(&sshdConfigKey, "sshdConfigKey", "", "sshd config key ex Port, PermitRootLogin etc")
-	sshdCmd.PersistentFlags().StringVar(&sshdConfigValue, "sshdConfigValue", "", "sshd config value ex 5623, no, yes etc")
-
-	sshdCmd.MarkPersistentFlagRequired("sshdConfigKey")
-	sshdCmd.MarkFlagsRequiredTogether("sshdConfigKey", "sshdConfigValue")
-
-	sshdCmd.PersistentFlags().StringVar(&matchDirective, "matchDirectiveValue", "", "match directive value ex all, User alice, bob etc")
 
 }

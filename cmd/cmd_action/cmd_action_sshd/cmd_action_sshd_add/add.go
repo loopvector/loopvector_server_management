@@ -9,6 +9,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var (
+	sshdConfigKey   string
+	sshdConfigValue string
+	matchDirective  string
+)
+
 // addCmd represents the add command
 var addCmd = &cobra.Command{
 	Use:   "add",
@@ -21,7 +27,11 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Args: cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		cmd_action_sshd.AddASshdConfig()
+		cmd_action_sshd.AddASshdConfig(
+			sshdConfigKey,
+			sshdConfigValue,
+			matchDirective,
+		)
 		return nil
 	},
 }
@@ -29,4 +39,11 @@ to quickly create a Cobra application.`,
 func init() {
 	cmd_action_sshd.GetActionSshdCmd().AddCommand(addCmd)
 
+	addCmd.Flags().StringVar(&sshdConfigKey, "sshdConfigKey", "", "sshd config key ex Port, PermitRootLogin etc")
+	addCmd.Flags().StringVar(&sshdConfigValue, "sshdConfigValue", "", "sshd config value ex 5623, no, yes etc")
+
+	addCmd.MarkFlagRequired("sshdConfigKey")
+	addCmd.MarkFlagsRequiredTogether("sshdConfigKey", "sshdConfigValue")
+
+	addCmd.Flags().StringVar(&matchDirective, "matchDirectiveValue", "", "match directive value ex all, User alice, bob etc")
 }

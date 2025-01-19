@@ -33,6 +33,8 @@ const KFullPathTaskAddUser = "task/configure/user/add_user.yaml"
 
 const KFullPathTaskAddLinesToFile = "task/configure/file/add_lines.yaml"
 const KFullPathTaskAddLineBlockToFile = "task/configure/file/add_line_block.yaml"
+const KFullPathTaskReadBlocks = "task/configure/file/read_blocks.yaml"
+const KFullPathTaskDeleteBlock = "task/configure/file/delete_block.yaml"
 
 const KFullPathTaskAddGroups = "task/configure/group/add_groups.yaml"
 const KFullPathTaskAddGroup = "task/configure/group/add_group.yaml"

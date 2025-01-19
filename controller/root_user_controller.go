@@ -23,7 +23,7 @@ func UpdateRootUserPassword(
 	//println("update root password for serverName: ", serverName.Name)
 
 	callback := RunAnsibleTaskCallback{
-		TaskName: "update root password",
+		TaskNames: []string{"update root password"},
 		OnChanged: func() {
 			serverId, err := serverName.GetServerIdUsingServerName()
 			if err != nil {

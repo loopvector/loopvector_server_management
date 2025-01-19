@@ -1,0 +1,7 @@
+- name: "delete line block from a file with block_timestamp: {{ block_timestamp }}"
+  become: "{{ should_become }}"
+  blockinfile:
+    path: "{{ file_path }}"
+    marker: "{{ comment_delimiter }} {mark} LSM MANAGED BLOCK: BLOCK_{{ block_timestamp }}"
+    state: absent
+  when: block_timestamp is defined and block_timestamp != ""

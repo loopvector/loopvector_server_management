@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"loopvector_server_management/cmd/cmd_action"
 	"loopvector_server_management/controller"
+	"loopvector_server_management/controller/helper"
 	"path/filepath"
 
 	"github.com/spf13/cobra"
@@ -68,45 +69,76 @@ func AddSudoers(cmd *cobra.Command) error {
 	serverName := cmd_action.GetServerName()
 
 	fileFullPath := filepath.Join(sudoersFileCreatePath, fileName)
-
 	if hasCombination1 {
 		if fileName == "" || groupName == "" {
 			return errors.New("flags --fileName and --groupName are required for this combination")
 		}
-		controller.AddASudoer(
+		_, blockTimestamp := helper.GetCurrentTimestampMillis()
+		controller.AddSudoers(
 			serverName,
 			cmd_action.GetServerSshConnectionInfo(),
 			controller.AddLinesToFileRequest{
-				FileFullPath:   fileFullPath,
-				FilePermission: filePermissionMode,
-				AsSudo:         true,
+				FileFullPath:     fileFullPath,
+				FilePermission:   filePermissionMode,
+				AsSudo:           true,
+				CommentDelimiter: helper.KCommentDelimiterHash,
+				BlockTimestamp:   blockTimestamp,
 			},
-			controller.SudoersAddRequest{
+			[]controller.SudoersAddRequest{{
 				GroupName:  groupName,
 				Host:       host,
 				RunAsUser:  runAsUser,
 				RunAsGroup: runAsGroup,
 				Password:   password,
 				Command:    command,
-			},
+			}},
 		)
 		//fmt.Println("Combination 1 selected")
 	} else if hasCombination2 {
 		if fileName == "" || line == "" {
 			return errors.New("flags --fileName and --line are required for this combination")
 		}
-		controller.AddLineBlockToFile(
+		// callbacks := []controller.RunAnsibleTaskCallback{{
+		// 	TaskNames: []string{"add line block to a file", "add line block to a file and set permissions"},
+		// 	OnChanged: func() {
+		// 		model.Sudoer{
+		// 			ServerID: serverName,
+		// 			Identifier: blockTimestamp,
+		// 		}.Create()
+		// 	},
+		// 	OnUnchanged: func() {},
+		// 	OnFailed:    func() {},
+		// }}
+		_, blockTimestamp := helper.GetCurrentTimestampMillis()
+		controller.AddSudoerLines(
 			serverName,
 			cmd_action.GetServerSshConnectionInfo(),
 			controller.AddLinesToFileRequest{
-				FileFullPath:   fileFullPath,
-				FilePermission: filePermissionMode,
-				AsSudo:         true,
+				FileFullPath:     fileFullPath,
+				FilePermission:   filePermissionMode,
+				AsSudo:           true,
+				CommentDelimiter: helper.KCommentDelimiterHash,
+				BlockTimestamp:   blockTimestamp,
 			},
 			[]controller.LineToFileAddRequest{{
 				Line: line,
 			}},
 		)
+		// controller.AddLineBlockToFile(
+		// 	serverName,
+		// 	cmd_action.GetServerSshConnectionInfo(),
+		// 	controller.AddLinesToFileRequest{
+		// 		FileFullPath:     fileFullPath,
+		// 		FilePermission:   filePermissionMode,
+		// 		AsSudo:           true,
+		// 		CommentDelimiter: helper.KCommentDelimiterHash,
+		// 		BlockTimestamp:   blockTimestamp,
+		// 	},
+		// 	[]controller.LineToFileAddRequest{{
+		// 		Line: line,
+		// 	}},
+		// 	nil,
+		// )
 		//fmt.Println("Combination 2 selected")
 	} else if hasCombination3 {
 		if fileName == "" || len(lines) == 0 {
@@ -117,16 +149,32 @@ func AddSudoers(cmd *cobra.Command) error {
 			oneLine := controller.LineToFileAddRequest{
 				Line: line,
 			}
-			controller.AddLineBlockToFile(
+			_, blockTimestamp := helper.GetCurrentTimestampMillis()
+			controller.AddSudoerLines(
 				serverName,
 				cmd_action.GetServerSshConnectionInfo(),
 				controller.AddLinesToFileRequest{
-					FileFullPath:   fileFullPath,
-					FilePermission: filePermissionMode,
-					AsSudo:         true,
+					FileFullPath:     fileFullPath,
+					FilePermission:   filePermissionMode,
+					AsSudo:           true,
+					BlockTimestamp:   blockTimestamp,
+					CommentDelimiter: helper.KCommentDelimiterHash,
 				},
 				[]controller.LineToFileAddRequest{oneLine},
 			)
+			// controller.AddLineBlockToFile(
+			// 	serverName,
+			// 	cmd_action.GetServerSshConnectionInfo(),
+			// 	controller.AddLinesToFileRequest{
+			// 		FileFullPath:     fileFullPath,
+			// 		FilePermission:   filePermissionMode,
+			// 		AsSudo:           true,
+			// 		BlockTimestamp:   blockTimestamp,
+			// 		CommentDelimiter: helper.KCommentDelimiterHash,
+			// 	},
+			// 	[]controller.LineToFileAddRequest{oneLine},
+			// 	nil,
+			// )
 		}
 
 		//fmt.Println("Combination 3 selected")
@@ -135,6 +183,34 @@ func AddSudoers(cmd *cobra.Command) error {
 	}
 
 	return nil
+}
+
+func ViewSudoers() {
+	fileFullPath := filepath.Join(sudoersFileCreatePath, fileName)
+	controller.ViewSudoerLines(
+		cmd_action.GetServerName(),
+		cmd_action.GetServerSshConnectionInfo(),
+		controller.ReadBlocksFromFileRequest{
+			FileFullPath:     fileFullPath,
+			AsSudo:           true,
+			CommentDelimiter: helper.KCommentDelimiterHash,
+		},
+	)
+}
+
+func DeleteASudoer(identifier string) {
+	fileFullPath := filepath.Join(sudoersFileCreatePath, fileName)
+	controller.DeleteASudoerLine(
+		cmd_action.GetServerName(),
+		cmd_action.GetServerSshConnectionInfo(),
+		controller.DeleteBlockFromFileRequest{
+			FileFullPath:     fileFullPath,
+			AsSudo:           true,
+			CommentDelimiter: helper.KCommentDelimiterHash,
+			BlockTimestamp:   identifier,
+		},
+		identifier,
+	)
 }
 
 func init() {

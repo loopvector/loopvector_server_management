@@ -3,7 +3,7 @@ package controller
 import "loopvector_server_management/model"
 
 type RunAnsibleTaskCallback struct {
-	TaskName    string
+	TaskNames   []string
 	OnChanged   func()
 	OnUnchanged func()
 	OnFailed    func()
@@ -74,18 +74,20 @@ func RunAnsibleTasks(
 		for _, taskResult := range play.Tasks {
 			for _, callback := range callbacks {
 				// println("About to check install status of ", callback.TaskName, " on ", serverName.Name, " in task name ", taskResult.Task.Name)
-				if taskResult.Task.Name == callback.TaskName {
-					if taskResult.Hosts["name="+serverName.Name].Failed == nil {
-						if taskResult.Hosts["name="+serverName.Name].Changed {
-							// println("changed ", callback.TaskName, " on ", serverName.Name)
-							callback.OnChanged()
+				for _, taskName := range callback.TaskNames {
+					if taskResult.Task.Name == taskName {
+						if taskResult.Hosts["name="+serverName.Name].Failed == nil {
+							if taskResult.Hosts["name="+serverName.Name].Changed {
+								// println("changed ", callback.TaskName, " on ", serverName.Name)
+								callback.OnChanged()
+							} else {
+								// println("unchanged ", callback.TaskName, " on ", serverName.Name)
+								callback.OnUnchanged()
+							}
 						} else {
-							// println("unchanged ", callback.TaskName, " on ", serverName.Name)
-							callback.OnUnchanged()
+							// println("failed ", callback.TaskName, " on ", serverName.Name)
+							callback.OnFailed()
 						}
-					} else {
-						// println("failed ", callback.TaskName, " on ", serverName.Name)
-						callback.OnFailed()
 					}
 				}
 			}

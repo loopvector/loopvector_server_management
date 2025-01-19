@@ -39,23 +39,56 @@ func _getLineFromRequest(sudoerEntry SudoersAddRequest) LineToFileAddRequest {
 	}
 }
 
-func AddASudoer(
+// func AddASudoer(
+// 	serverName model.ServerNameModel,
+// 	serverSshConnectionInfo model.ServerSshConnectionInfo,
+// 	addLinesToFileRequest AddLinesToFileRequest,
+// 	sudoerEntry SudoersAddRequest,
+// ) error {
+// 	var lines []LineToFileAddRequest
+// 	lines = append(
+// 		lines,
+// 		_getLineFromRequest(sudoerEntry),
+// 	)
+// 	AddSudoerLines(
+// 		serverName,
+// 		serverSshConnectionInfo,
+// 		addLinesToFileRequest,
+// 		lines,
+// 	)
+// 	return nil
+// }
+
+func AddSudoerLines(
 	serverName model.ServerNameModel,
 	serverSshConnectionInfo model.ServerSshConnectionInfo,
 	addLinesToFileRequest AddLinesToFileRequest,
-	sudoerEntry SudoersAddRequest,
+	lines []LineToFileAddRequest,
 ) error {
-	var lines []LineToFileAddRequest
-	lines = append(
-		lines,
-		_getLineFromRequest(sudoerEntry),
-	)
-	AddLineBlockToFile(
-		serverName,
-		serverSshConnectionInfo,
-		addLinesToFileRequest,
-		lines,
-	)
+	serverId, err := serverName.GetServerIdUsingServerName()
+	if err != nil {
+		panic(err)
+	}
+	callbacks := []RunAnsibleTaskCallback{{
+		TaskNames: []string{"add line block to a file", "add line block to a file and set permissions"},
+		OnChanged: func() {
+			model.Sudoer{
+				ServerID:   serverId,
+				Identifier: addLinesToFileRequest.BlockTimestamp,
+			}.Create()
+		},
+		OnUnchanged: func() {},
+		OnFailed:    func() {},
+	}}
+	for _, line := range lines {
+		AddLineBlockToFile(
+			serverName,
+			serverSshConnectionInfo,
+			addLinesToFileRequest,
+			[]LineToFileAddRequest{line},
+			callbacks,
+		)
+	}
 	return nil
 }
 
@@ -66,21 +99,79 @@ func AddSudoers(
 	sudoerEntries []SudoersAddRequest,
 ) error {
 	var lines []LineToFileAddRequest
-
 	for _, sudoerEntry := range sudoerEntries {
 		lines = append(
 			lines,
 			_getLineFromRequest(sudoerEntry),
 		)
 	}
-	AddLineBlockToFile(
+	AddSudoerLines(
 		serverName,
 		serverSshConnectionInfo,
 		addLinesToFileRequest,
 		lines,
 	)
+	// AddLineBlockToFile(
+	// 	serverName,
+	// 	serverSshConnectionInfo,
+	// 	addLinesToFileRequest,
+	// 	lines,
+	// 	nil,
+	// )
 	return nil
 }
+
+func DeleteASudoerLine(
+	serverName model.ServerNameModel,
+	serverSshConnectionInfo model.ServerSshConnectionInfo,
+	deleteBlockFromFileRequest DeleteBlockFromFileRequest,
+	identifier string,
+) error {
+	serverId, err := serverName.GetServerIdUsingServerName()
+	if err != nil {
+		panic(err)
+	}
+	callbacks := []RunAnsibleTaskCallback{{
+		TaskNames: []string{"delete line block from a file with block_timestamp: " + identifier},
+		OnChanged: func() {
+			model.Sudoer{
+				ServerID:   serverId,
+				Identifier: identifier,
+			}.DeleteUsingIdentifierAndServerId()
+		},
+		OnUnchanged: func() {},
+		OnFailed:    func() {},
+	}}
+	DeleteBlockFromFile(
+		serverName,
+		serverSshConnectionInfo,
+		deleteBlockFromFileRequest,
+		callbacks,
+	)
+	return nil
+}
+
+func ViewSudoerLines(
+	serverName model.ServerNameModel,
+	serverSshConnectionInfo model.ServerSshConnectionInfo,
+	readBlocksFromFileRequest ReadBlocksFromFileRequest,
+) error {
+	ReadBlocksFromFile(
+		serverName,
+		serverSshConnectionInfo,
+		readBlocksFromFileRequest,
+	)
+	return nil
+}
+
+// func AddSudoerLineToSudoersFile(
+// 	serverName model.ServerNameModel,
+// 	serverSshConnectionInfo model.ServerSshConnectionInfo,
+// 	addLinesToFileRequest AddLinesToFileRequest,
+// 	lines []LineToFileAddRequest,
+// ) {
+
+// }
 
 // func AddASudoerLine(
 // 	serverName string,

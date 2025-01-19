@@ -77,7 +77,7 @@ func AddUsersToServer(
 			callbacks = append(
 				callbacks,
 				RunAnsibleTaskCallback{
-					TaskName: "create user " + user.Username + " if it does not exist",
+					TaskNames: []string{"create user " + user.Username + " if it does not exist"},
 					OnChanged: func() {
 						model.ServerUser{
 							ServerID: serverId,

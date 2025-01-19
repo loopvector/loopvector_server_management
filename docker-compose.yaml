@@ -1,6 +1,6 @@
 services:
   app:
-    image: loopvector/server/lsm:v0.0.1
+    image: loopvector/lsm:v0.0.1
     volumes:
       - ${SSH_PUB_KEY_FOLDER}:/app/.ssh:ro
     environment:
