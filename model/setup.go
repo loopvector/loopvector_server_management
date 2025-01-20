@@ -50,6 +50,7 @@ func InitializeDB(shouldMigrate bool) {
 		ServerApp{}.Initialize()
 		ServerGroup{}.Initialize()
 		User{}.Initialize()
+		ServerUserGroup{}.Initialize()
 		UserSession{}.Initialize()
 		PasswordResetToken{}.Initialize()
 		AuthorizationKey{}.Initialize()

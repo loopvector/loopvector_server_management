@@ -23,6 +23,14 @@ func (id ServerIDModel) AddGroup(serverGroup ServerGroup) error {
 	return nil
 }
 
+func (u ServerGroup) GetUsingServerIdAndName() (ServerGroup, error) {
+	var serverGroup ServerGroup
+	if err := GetDB().Where(&ServerGroup{ServerID: u.ServerID, Name: u.Name}).First(&serverGroup).Error; err != nil {
+		return ServerGroup{}, err
+	}
+	return serverGroup, nil
+}
+
 // func (sg ServerGroup) Remove() error {
 // 	if err := GetDB().Where(&ServerGroup{
 // 		ServerID: sg.ID,

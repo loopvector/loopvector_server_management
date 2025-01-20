@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"log"
 	"loopvector_server_management/controller/helper"
 	"loopvector_server_management/model"
 )
@@ -61,17 +62,18 @@ func AddUsersToServer(
 	serverSshConnectionInfo model.ServerSshConnectionInfo,
 	users []AddUsersToServerRequest,
 ) error {
-
+	// log.Println("AddUsersToServer called")
 	userVars := _buildAddUsersToServerRequestMap(users)
+	serverId, err := serverName.GetServerIdUsingServerName()
+	if err != nil {
+		panic(err)
+	}
+
+	// log.Println("AddUsersToServer userVars: ", userVars)
 
 	if userVars != nil {
 
 		callbacks := []RunAnsibleTaskCallback{}
-
-		serverId, err := serverName.GetServerIdUsingServerName()
-		if err != nil {
-			panic(err)
-		}
 
 		for _, user := range users {
 			callbacks = append(
@@ -116,13 +118,80 @@ func AddUsersToServer(
 
 	userToGroupsVars := _buildAddUsersToGroupsRequestMap(users)
 
+	// log.Println("AddUsersToServer userToGroupsVars: ", userToGroupsVars)
 	if userToGroupsVars != nil {
-		_, err := RunSimpleAnsibleTasks(
+		callbacks := []RunAnsibleTaskCallback{}
+		for _, user := range users {
+			serverUser, err := model.ServerUser{
+				ServerID: serverId,
+				Username: user.Username,
+			}.GetUsingServerIdAndUsername()
+			if err != nil {
+				panic(err)
+			}
+			for _, group := range user.Groups {
+				serverGroup, err := model.ServerGroup{
+					ServerID: serverId,
+					Name:     group,
+				}.GetUsingServerIdAndName()
+				if err != nil {
+					panic(err)
+				}
+				callbacks = append(
+					callbacks, RunAnsibleTaskCallback{
+						TaskNames: []string{"add user " + user.Username + " to group " + group},
+						OnChanged: func() {
+							// log.Println("ServerUserGroup callback OnChanged")
+							model.ServerUserGroup{
+								ServerID:      serverId,
+								ServerGroupID: serverGroup.ID,
+								ServerUserID:  serverUser.ID,
+							}.Create()
+						},
+						OnUnchanged: func() {
+							// log.Println("ServerUserGroup callback OnUnchanged")
+							model.ServerUserGroup{
+								ServerID:      serverId,
+								ServerGroupID: serverGroup.ID,
+								ServerUserID:  serverUser.ID,
+							}.Create()
+						},
+						OnFailed: func() {
+							log.Println("ServerUserGroup callback OnFailed")
+						},
+					})
+			}
+		}
+
+		// callbacks := []RunAnsibleTaskCallback{
+		// 	{
+		// 		TaskNames: []string{"add users to groups"},
+		// 		OnChanged: func() {
+		// 			model.ServerUserGroup{
+		// 				ServerID:      serverId,
+		// 				ServerGroupID: serverGroup.ID,
+		// 				ServerUserID:  serverUser.ID,
+		// 			}.Create()
+		// 		},
+		// 		OnUnchanged: func() {
+		// 			model.ServerUserGroup{
+		// 				ServerID:      serverId,
+		// 				ServerGroupID: serverGroup.ID,
+		// 				ServerUserID:  serverUser.ID,
+		// 			}.Create()
+		// 		},
+		// 		OnFailed: func() {},
+		// 	},
+		// }
+		// log.Println("ServerUserGroup running ansible task, callback length: ", len(callbacks))
+		_, err := RunAnsibleTasks(
 			serverName,
 			serverSshConnectionInfo,
-			helper.KFullPathTaskAddUsersToGroups,
-			userToGroupsVars,
-			nil,
+			[]model.AnsibleTask{{
+				FullPath: helper.KFullPathTaskAddUsersToGroups,
+				Vars:     userToGroupsVars,
+			}},
+			callbacks,
 		)
 
 		if err != nil {

@@ -1,5 +1,8 @@
-- name: Ensure user "{{ user_name }}" is added to groups "{{ user_groups }}"
-  ansible.builtin.user:
-    name: "{{ user_name }}"
-    groups: "{{ user_groups | join(',') }}"
-    append: yes
+- name: ensure user "{{ user_name }}" is added to group
+  include_tasks: add_user_to_group.yaml
+  vars:
+    user: "{{ user_name }}"
+    group: "{{ user_group }}"
+  loop: "{{ user_groups }}"
+  loop_control:
+    loop_var: user_group  
