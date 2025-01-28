@@ -10,13 +10,13 @@ clean:
 
 .PHONY: build
 build: clean modsync
-	docker build -t loopvector/lsm:v0.0.1 .
+	docker build -t loopvector/lsm:v0.0.2 .
 	make clean
 
 .PHONY: push
 push: 
-	docker tag loopvector/lsm:v0.0.1 loopvector/lsm:v0.0.1
-	docker push loopvector/lsm:v0.0.1	
+	docker tag loopvector/lsm:v0.0.2 loopvector/lsm:v0.0.2
+	docker push loopvector/lsm:v0.0.2	
 
 .PHONY: run
 run: build push	
